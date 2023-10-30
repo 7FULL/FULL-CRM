@@ -50,12 +50,18 @@ android {
 }
 
 dependencies {
+    //Navegacion
+    implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    //Inicio de sesion con google
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
     //Para el manejo de los estados
     implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
 
     //Para las solicitudes a la API
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     //Para el calendario
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")

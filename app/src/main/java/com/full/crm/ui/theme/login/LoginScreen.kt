@@ -1,6 +1,5 @@
-package com.full.crm.login.ui
+package com.full.crm.ui.theme.login
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,41 +21,38 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.full.crm.network.API
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import com.full.crm.R
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
-    val scope = rememberCoroutineScope()
-
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val username: String by loginViewModel.username.observeAsState(initial = "")
+    val error: String by loginViewModel.error.observeAsState(initial = "")
 
-    //TODO: Hacer que el boton de iniciar sesion haga una peticion a la API
+    //Pillamos el teclado simplemente para poder ocultarlo
+    val keyboard = LocalSoftwareKeyboardController.current
+
     //TODO: Limitar el numero de caracteres en password
-    //TODO: Manejar el texto desde fuera
+    //TODO: Mensajito de error
 
     Box(
         modifier = modifier
@@ -67,9 +63,9 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
-                .offset(y = (-32).dp)
+                .offset(y = (-100).dp)
                 .requiredWidth(width = 427.dp)
-                .requiredHeight(height = 377.dp)
+                .requiredHeight(height = 450.dp)
                 .clip(shape = RoundedCornerShape(71.dp))
                 .background(
                     brush = Brush.linearGradient(
@@ -118,15 +114,8 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .requiredWidth(width = 263.dp)
                 .requiredHeight(height = 47.dp)
                 .clickable {
-                    var res = "";
-
-                    scope.launch {
-                        async {
-                            //res = API.service.devUser()
-                        }.await()
-
-                        Log.d("API", res)
-                    }
+                    keyboard?.hide()
+                    loginViewModel.login()
                 }
         ) {
             Box(
@@ -203,7 +192,7 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     .align(alignment = Alignment.TopStart)
                     .offset(
                         x = 17.dp,
-                        y = -3.dp
+                        y = (-3).dp
                     )
                     .wrapContentHeight(align = Alignment.CenterVertically))
         }
@@ -220,6 +209,19 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     y = 525.dp
                 )
                 .wrapContentHeight(align = Alignment.CenterVertically))
+        //Texto de error
+        Text(
+            text = error,
+            //TODO: Preguntar al profe porque el color no se aplica
+            color = Color(R.color.cancel),
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            modifier = Modifier
+                .align(alignment = Alignment.TopCenter)
+                .offset(y = 575.dp)
+                .wrapContentHeight(align = Alignment.CenterVertically)
+        )
+        //TODO: Google login
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
