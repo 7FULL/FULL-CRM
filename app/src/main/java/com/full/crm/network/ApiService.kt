@@ -24,8 +24,16 @@ interface ApiService {
      * Funcion para loguearse
      * @param username
      * @param password
-     * @return Devuelve un usuario en formato JSON si el login es correcto, sino devuelve un usuario vacio
+     * @return Devuelve un usuario si el login es correcto, sino devuelve un usuario vacio
      */
     @POST("api/employee/login")
     suspend fun login(@Query("username") username: String, @Query("password") password: String): Response<DataResponse<Employee>>
+
+    /**
+     * Funcion para obtener el usuario basado en el email
+     * @param email
+     * @return Devuelve un usuario si el login es correcto, sino devuelve un usuario vacio
+     */
+    @GET("api/employee")
+    suspend fun getByEmail(@Query("email") email: String): Response<DataResponse<Employee>>
 }

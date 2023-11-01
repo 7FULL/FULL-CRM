@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -50,10 +51,15 @@ android {
 }
 
 dependencies {
+    //Mas iconos
+    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+
     //Navegacion
     implementation("androidx.navigation:navigation-compose:2.7.4")
 
-    //Inicio de sesion con google
+    //Inicio de sesion con google (firebase)
+    implementation(platform("com.google.firebase:firebase-bom:32.4.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     //Para el manejo de los estados

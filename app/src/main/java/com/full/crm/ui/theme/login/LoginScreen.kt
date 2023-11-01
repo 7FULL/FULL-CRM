@@ -1,5 +1,8 @@
 package com.full.crm.ui.theme.login
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,6 +44,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.full.crm.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -47,12 +55,26 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val username: String by loginViewModel.username.observeAsState(initial = "")
     val error: String by loginViewModel.error.observeAsState(initial = "")
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ){
+        val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            loginViewModel.signInWithGoogle(credential)
+        } catch (e: ApiException) {
+            //TODO: Si el satus code es 7 es que no tine acceso a internet (Poner mensajito)
+            //Aqui se pueden ver los codigos de error
+            //https://developers.google.com/android/reference/com/google/android/gms/common/api/CommonStatusCodes
+            Log.i("CRM", "Inicio de sesion con google fallo", e)
+        }
+    }
+    val tokenWeb = "52023902309-lg7u8pa3apvdhlgt4slhifm8vhrg6cc6.apps.googleusercontent.com"
+    val context = LocalContext.current
 
     //Pillamos el teclado simplemente para poder ocultarlo
     val keyboard = LocalSoftwareKeyboardController.current
-
-    //TODO: Limitar el numero de caracteres en password
-    //TODO: Mensajito de error
 
     Box(
         modifier = modifier
@@ -221,13 +243,21 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .offset(y = 575.dp)
                 .wrapContentHeight(align = Alignment.CenterVertically)
         )
-        //TODO: Google login
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
                 .padding(bottom = 50.dp)
                 .requiredWidth(width = 263.dp)
                 .requiredHeight(height = 47.dp)
+                .clickable {
+                    keyboard?.hide()
+                    val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(tokenWeb)
+                        .requestEmail()
+                        .build()
+                    val cliente = GoogleSignIn.getClient(context, opciones)
+                    launcher.launch(cliente.signInIntent)
+                }
         ) {
             Box(
                 modifier = Modifier
