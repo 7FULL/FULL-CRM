@@ -1,97 +1,72 @@
 package com.full.crm.models
-class Employee {
-    private var username: String? = null
-    private var password: String? = null
-    private var name: String? = null
-    private var surname: String? = null
-    private var email: String? = null
-    private var phone: String? = null
-    private var appointments: Array<Appointment>? = null
 
-    fun Employee() {}
+class Employee(
+    id: String?,
+    username: String?,
+    password: String?,
+    name: String?,
+    surname: String?,
+    email: String?,
+    phone: String?,
+    role: Role?,
+    private var appointments: Array<Appointment>?,
+    private var bills: Array<Bill>?,
+    private var clients: Array<Client>?
+) : User(id, username, password, name, surname, email, phone, role) {
 
-    fun Employee(
-        username: String?,
-        password: String?,
-        name: String?,
-        surname: String?,
-        email: String?,
-        phone: String?,
-        appointments: Array<Appointment>?
-    ) {
-        this.username = username
-        this.password = password
-        this.name = name
-        this.surname = surname
-        this.email = email
-        this.phone = phone
+    //region getters and setters
+    public fun getAppointments(): Array<Appointment>? {
+        return appointments
+    }
+
+    public fun setAppointments(appointments: Array<Appointment>?) {
         this.appointments = appointments
     }
 
-    //region getters and setters
-
-    fun getUsername(): String? {
-        return username
+    public fun getBills(): Array<Bill>? {
+        return bills
     }
 
-    fun setUsername(username: String?) {
-        this.username = username
+    public fun setBills(bills: Array<Bill>?) {
+        this.bills = bills
     }
 
-    fun getPassword(): String? {
-        return password
+    public fun getClients(): Array<Client>? {
+        return clients
     }
 
-    fun setPassword(password: String?) {
-        this.password = password
-    }
-
-    fun getName(): String? {
-        return name
-    }
-
-    fun setName(name: String?) {
-        this.name = name
-    }
-
-    fun getSurname(): String? {
-        return surname
-    }
-
-    fun setSurname(surname: String?) {
-        this.surname = surname
-    }
-
-    fun getEmail(): String? {
-        return email
-    }
-
-    fun setEmail(email: String?) {
-        this.email = email
-    }
-
-    fun getPhone(): String? {
-        return phone
-    }
-
-    fun setPhone(phone: String?) {
-        this.phone = phone
+    public fun setClients(clients: Array<Client>?) {
+        this.clients = clients
     }
     //endregion
 
-    override fun toString(): String {
-        var x = "Employee(username=$username, password=$password, name=$name, surname=$surname, email=$email, phone=$phone"
+    constructor() : this(null, null, null, null, null, null, null, null, null, null, null)
 
+    @Override
+    override fun toString(): String {
+        var string = super.toString()
+
+        string += "Appointments: \n"
         if (appointments != null) {
-            x += ", appointments=["
             for (appointment in appointments!!) {
-                x += "$appointment, "
+                string += appointment.toString()
             }
-            x += "]"
         }
 
-        x += ")"
+        string += "Bills: \n"
+        if (bills != null) {
+            for (bill in bills!!) {
+                string += bill.toString()
+            }
+        }
 
-        return x
+        string += "Clients: \n"
+        if (clients != null) {
+            for (client in clients!!) {
+                string += client.toString()
+            }
+        }
+
+        return string
     }
 }

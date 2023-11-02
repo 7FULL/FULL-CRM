@@ -46,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.full.crm.navigation.NavigationManager
+import com.full.crm.network.API
 import com.full.crm.ui.theme.CRMTheme
 import com.himanshoe.kalendar.Kalendar
 import com.himanshoe.kalendar.KalendarType
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int = 0) {
+fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
     Box(
         modifier = modifier
     ) {
@@ -94,8 +95,9 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int = 0) {
                     imageVector = Icons.Rounded.DateRange,
                     contentDescription = "Vector",
                     modifier = Modifier
-                        .size(size = 40.dp)
+                        .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 0) NavigationManager.instance?.navigate("agenda") }
                 )
             }
             Column (
@@ -108,8 +110,9 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int = 0) {
                     imageVector = Icons.Rounded.AccountBalanceWallet,
                     contentDescription = "Vector",
                     modifier = Modifier
-                        .size(size = 40.dp)
+                        .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 1) NavigationManager.instance?.navigate("bills") }
                 )
             }
             Column (
@@ -122,7 +125,7 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int = 0) {
                     imageVector = Icons.Rounded.Search,
                     contentDescription = "Vector",
                     modifier = Modifier
-                        .size(size = 40.dp)
+                        .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
                 )
             }
@@ -136,9 +139,9 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int = 0) {
                     imageVector = Icons.Rounded.ExitToApp,
                     contentDescription = "Vector",
                     modifier = Modifier
-                        .size(size = 40.dp)
+                        .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
-                        .clickable { NavigationManager.instance?.navigate("login") }
+                        .clickable { if (selectedIcon != 3) API.logout() }
                 )
             }
         }

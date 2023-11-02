@@ -1,26 +1,18 @@
 package com.full.crm.ui.theme.login
 
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.full.crm.models.Employee
 import com.full.crm.navigation.NavigationManager
 import com.full.crm.network.API
 import com.full.crm.network.DataResponse
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import retrofit2.Response
 
 class LoginViewModel: ViewModel() {
 
@@ -101,16 +93,18 @@ class LoginViewModel: ViewModel() {
 
                 if (result.isSuccessful) {
 
-                    val data: DataResponse<Employee> = result.body()!!
+                    val response: DataResponse<Employee> = result.body()!!
 
-                    if (data.code == 200) {
+                    if (response.code == 200) {
+                        API.setUser(response.data!!)
+
                         Log.i("CRM", "Login correcto")
-                        Log.i("CRM", data.toString())
+                        Log.i("CRM", response.data.toString())
 
                         NavigationManager.instance?.navigate("agenda")
                     } else {
                         //Podria manejarse tambien los mensajes en el backend y mostrarlos aqui
-                        when (data.code) {
+                        when (response.code) {
                             401 -> {
                                 _error.value = "Usuario o contraseña incorrectos"
                             }

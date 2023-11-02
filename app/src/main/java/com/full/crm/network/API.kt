@@ -1,5 +1,9 @@
 package com.full.crm.network
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.full.crm.models.Employee
+import com.full.crm.navigation.NavigationManager
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -17,5 +21,20 @@ private val retrofit = Retrofit.Builder()
 object API {
     val service : ApiService by lazy {
         retrofit.create(ApiService::class.java)
+    }
+
+    private val _user: MutableLiveData<Employee> = MutableLiveData<Employee>()
+    val User: LiveData<Employee> = _user
+
+    val employeeLogged: Employee?
+        get() = _user.value
+
+    fun setUser(employee: Employee) {
+        _user.value = employee
+    }
+
+    fun logout() {
+        _user.value = null
+        NavigationManager.instance?.navigate("login")
     }
 }

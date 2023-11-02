@@ -1,7 +1,10 @@
 package com.full.crm.network
 
+import com.full.crm.models.Bill
+import com.full.crm.models.Client
 import com.full.crm.models.Employee
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -36,4 +39,7 @@ interface ApiService {
      */
     @GET("api/employee")
     suspend fun getByEmail(@Query("email") email: String): Response<DataResponse<Employee>>
+
+    @POST("api/bill/addBill")
+    suspend fun addBill(@Body billRequest: BillRequest): Response<DataResponse<String>>
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
@@ -75,7 +76,7 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
 
     //Pillamos el teclado simplemente para poder ocultarlo
     val keyboard = LocalSoftwareKeyboardController.current
-
+    
     Box(
         modifier = modifier
             .requiredWidth(width = 360.dp)
@@ -218,6 +219,15 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     )
                     .wrapContentHeight(align = Alignment.CenterVertically))
         }
+        //TODO: Quitar cuando pase a produccion(entregarlo xD)
+        Button(
+            onClick = {
+                loginViewModel.onLoginChanged("admin", "admin")
+                loginViewModel.login()
+            }
+        ) {
+            Text(text = "Development mode only")
+        }
         Text(
             text = "¿Has olvidado tu contraseña?",
             color = Color(0xff26a69a),
@@ -234,7 +244,7 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         //Texto de error
         Text(
             text = error,
-            //TODO: Preguntar al profe porque el color no se aplica
+            //TODO: Preguntar al profe porque el color no se aplica, a capon si se ve bien
             color = Color(R.color.cancel),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -251,7 +261,8 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .requiredHeight(height = 47.dp)
                 .clickable {
                     keyboard?.hide()
-                    val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    val opciones = GoogleSignInOptions
+                        .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(tokenWeb)
                         .requestEmail()
                         .build()

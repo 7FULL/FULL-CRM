@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "52023902309",
+    "project_id": "crm-compose",
+    "storage_bucket": "crm-compose.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52023902309:android:b20e7beb88643df154868c",
+        "android_client_info": {
+          "package_name": "com.full.crm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52023902309-p6rkvkj553h0vqhgjb09989neupnla8u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.full.crm",
+            "certificate_hash": "2b991d881fa643ad6429066944828c9c43c1092a"
+          }
+        },
+        {
+          "client_id": "52023902309-cg7ick5caanthn61fj0vjst2rofmm0i9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwTJBZT4rTyA6BsGLmxTX-jGl5gDb6I7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52023902309-cg7ick5caanthn61fj0vjst2rofmm0i9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
