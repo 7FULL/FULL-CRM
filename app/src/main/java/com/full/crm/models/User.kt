@@ -68,6 +68,10 @@ open class User(
         this.role = role
     }
 
+    public fun getId(): String? {
+        return id
+    }
+
     //endregion
 
     //TOString

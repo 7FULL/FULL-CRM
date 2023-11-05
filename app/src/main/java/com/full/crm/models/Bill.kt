@@ -3,31 +3,37 @@ package com.full.crm.models
 import com.full.crm.network.IsoDateTimeSerializer
 import com.google.gson.annotations.JsonAdapter
 import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.NumberFormat
 import java.util.Date
+import java.util.Locale
 
-class Bill {
+
+class Bill//Constructor con todos los atributos menos la id
+    (
+    @JsonAdapter(IsoDateTimeSerializer::class)
+    private val emissionDate: Date?,
+    @JsonAdapter(IsoDateTimeSerializer::class)
+    private val expirationDate: Date?,//Se utiliza bigdecimal para evitar problemas con los decimales (es lo que se recomienda para el dinero)
+    private val price: BigDecimal?,
+    private val paid: Boolean,
+    private val name: String?,
+    private val clientID: String?,
+    private val employeeID: String?
+) {
     private val id: String? = null
-
-    @JsonAdapter(IsoDateTimeSerializer::class)
-    private val emissionDate: Date? = null
-
-    @JsonAdapter(IsoDateTimeSerializer::class)
-    private val expirationDate: Date? = null
-
-    //Se utiliza bigdecimal para evitar problemas con los decimales (es lo que se recomienda para el dinero)
-    private val price: BigDecimal? = null
-
-    private val paid = false
-
-    private val name: String? = null
-
-    private val clientID: String? = null
-
-    private val employeeID: String? = null
 
     //Getters
     fun getId(): String? {
         return id
+    }
+
+    fun getClientID(): String? {
+        return clientID
+    }
+
+    fun getEmployeeID(): String? {
+        return employeeID
     }
 
     fun getEmisionDate(): Date? {
@@ -40,6 +46,14 @@ class Bill {
 
     fun getPrice(): BigDecimal? {
         return price
+    }
+
+    fun getPriceString(): String{
+        val displayVal: BigDecimal = this.price?.setScale(2, RoundingMode.HALF_EVEN) ?: BigDecimal(0)
+        val eurCostFormat: NumberFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE)
+        eurCostFormat.minimumFractionDigits = 1
+        eurCostFormat.maximumFractionDigits = 2
+        return eurCostFormat.format(displayVal.toDouble())
     }
 
     fun isPaid(): Boolean {

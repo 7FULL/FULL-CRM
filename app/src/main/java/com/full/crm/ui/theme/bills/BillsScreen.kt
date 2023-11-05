@@ -1,19 +1,14 @@
 package com.full.crm.ui.theme.bills
 
-import android.text.format.DateUtils
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,18 +47,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.full.crm.OptionsBar
 import com.full.crm.models.Bill
-import com.full.crm.network.API
 import java.text.SimpleDateFormat
 import java.util.Calendar
+
+
+var state: String = "Todas"
+var client: String = "Todos"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Bills(billsViewModel: BillsViewModel) {
-    val bills: Array<Bill> = API.User.observeAsState().value?.getBills() ?: emptyArray()
-    val clients: Array<String?> = API.User.observeAsState().value?.getClients()?.map { it.getName() }?.toTypedArray() ?: emptyArray()
-    var text by rememberSaveable { mutableStateOf("") }
-    var active by rememberSaveable { mutableStateOf(false) }
+    val searchBarText: String by billsViewModel.searchBarText.observeAsState("")
+    var searchBarActive by rememberSaveable { mutableStateOf(false) }
 
+    val auxBills: MutableList<Bill> by billsViewModel.auxBills.observeAsState(mutableListOf())
+    val searchBills: MutableList<Bill> by billsViewModel.searchBills.observeAsState(mutableListOf())
+
+    val clients: Array<String> by billsViewModel.clients.observeAsState(emptyArray())
+
+    billsViewModel.initialize()
     Scaffold(
         bottomBar =
         {
@@ -76,13 +77,15 @@ fun Bills(billsViewModel: BillsViewModel) {
 
         floatingActionButton = {
             FloatingActionButton(onClick =
-            {/* TODO: Añadir el dialogo para crear una factura */},
+            {/* TODO: Añadir el dialogo para crear una factura */
+                billsViewModel.onAddBillClicked()
+            },
                 containerColor = Color(0xFF26A69A),
                 contentColor = Color.White
             ){
             Text("+", fontSize = 30.sp)
         } },
-    ) { padding  ->
+    ) { padding ->
         Box(modifier = Modifier
             .padding(padding)
             .fillMaxSize(),
@@ -92,12 +95,18 @@ fun Bills(billsViewModel: BillsViewModel) {
                 modifier = Modifier
                     .padding(top = 75.dp)
                     .background(color = Color.White),
-                query = text,
-                onQueryChange = { text = it },
-                onSearch = { active = false },
-                active = active,
+                query = searchBarText,
+                onQueryChange = {
+                                    billsViewModel.onSearchBarTextChanged(it)
+                                },
+                onSearch = {
+                                searchBarActive = false
+
+                                billsViewModel.filterBills()
+                           },
+                active = searchBarActive,
                 onActiveChange = {
-                    active = it
+                    searchBarActive = it
                 },
                 placeholder = { Text("Nombre de la factura") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -110,21 +119,23 @@ fun Bills(billsViewModel: BillsViewModel) {
                     )
                 },
             ) {
-                //TODO: Poner las 5 facturas mas recientes
-                repeat(4) { idx ->
-                    val resultText = "Suggestion $idx"
-                    ListItem(
-                        headlineContent = { Text(resultText) },
-                        supportingContent = { Text("Additional info") },
-                        leadingContent = { Icon(Icons.Filled.AttachMoney, contentDescription = null) },
-                        modifier = Modifier
-                            .clickable {
-                                text = resultText
-                                active = false
-                            }
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
+                if (searchBills != null){
+                    repeat(searchBills.size) { idx ->
+                        val resultText = searchBills[idx].getName() ?: "Esta factura no tiene nombre"
+                        ListItem(
+                            headlineContent = { Text(resultText) },
+                            supportingContent = { Text(searchBills[idx].getPriceString()) },
+                            leadingContent = { Icon(Icons.Filled.AttachMoney, contentDescription = null) },
+                            modifier = Modifier
+                                .clickable {
+                                    searchBarActive = false
+
+                                    billsViewModel.onSearchBarTextChanged(resultText)
+                                }
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
 
@@ -144,14 +155,28 @@ fun Bills(billsViewModel: BillsViewModel) {
                         .background(color = Color.White)
                         .fillMaxWidth()
                 )
-                DropdownMenuBox(modifier = Modifier
-                    .width(175.dp)
-                    .align(alignment = Alignment.TopStart)
-                    .padding(top = 175.dp), items = clients, placeholder = "Sin clientes")
-                DropdownMenuBox(modifier = Modifier
-                    .width(175.dp)
-                    .align(alignment = Alignment.TopEnd)
-                    .padding(top = 175.dp), items = clients, placeholder = "Sin clientes")
+                DropdownMenuBox(
+                    modifier = Modifier
+                        .width(175.dp)
+                        .align(alignment = Alignment.TopStart)
+                        .padding(top = 175.dp), items = clients,
+                    placeholder = "Sin clientes"
+                ) { value ->
+                    client = value
+
+                    billsViewModel.onClientChanged(client)
+                }
+                DropdownMenuBox(
+                    modifier = Modifier
+                        .width(175.dp)
+                        .align(alignment = Alignment.TopEnd)
+                        .padding(top = 175.dp), items = arrayOf("Todas", "Pagada", "Pendiente", "Vencida"),
+                    placeholder = "Esto es un error"
+                ) { value ->
+                    state = value
+
+                    billsViewModel.onStateChanged(state)
+                }
                 Box(
                     modifier = Modifier
                         .align(alignment = Alignment.TopCenter)
@@ -159,13 +184,29 @@ fun Bills(billsViewModel: BillsViewModel) {
                         .requiredWidth(width = 360.dp)
                         .requiredHeight(height = 684.dp)
                 ) {
-                    //TODO: Crear el LazyColumn con los items de las facturas
-                    LazyColumn(modifier = Modifier
-                        .padding(bottom = 140.dp)
-                        .fillMaxWidth()){
-                        items(bills.size) { idx ->
-                            Bill(bills[idx], modifier = Modifier
-                                .fillMaxWidth())
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(bottom = 140.dp)
+                            .fillMaxWidth()
+                    )
+                    {
+                        if (auxBills.isEmpty()) item {
+                            Text(
+                                text = "No hay facturas",
+                                color = Color.Black,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier
+                                    .align(alignment = Alignment.Center)
+                                    .padding(top = 50.dp)
+                                    .background(color = Color.White)
+                                    .fillMaxWidth()
+                            )
+                        }else{
+                            items(auxBills.size) { idx ->
+                                Bill(auxBills[idx], modifier = Modifier
+                                    .fillMaxWidth(), billsViewModel)
+                            }
                         }
                     }
                 }
@@ -197,7 +238,7 @@ fun Bills(billsViewModel: BillsViewModel) {
 }
 
 @Composable
-fun Bill(bill: Bill, modifier: Modifier = Modifier) {
+fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewModel) {
     var emissionDate: String = SimpleDateFormat("dd/MM").format(bill.getEmisionDate()!!)
     val expirationDate: String = SimpleDateFormat("dd/MM").format(bill.getExpirationDate()!!)
 
@@ -216,7 +257,12 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
                     Offset(size.width, y),
                     strokeWidth
                 )
-            }){
+            }
+            .clickable { /* TODO: Navegar a la factura */
+                billsViewModel.onBillClicked(bill)
+            }
+    )
+    {
 
         Text(
             text = bill.getName()?: "Sin nombre",
@@ -230,7 +276,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = emissionDate,
+            text = expirationDate,
             color = Color.Black,
             style = TextStyle(
                 fontSize = 14.sp
@@ -243,7 +289,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = expirationDate,
+            text = emissionDate,
             color = Color.Black,
             style = TextStyle(
                 fontSize = 14.sp
@@ -256,7 +302,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
         )
 
         Text(
-            text = bill.getPrice().toString()+"€",
+            text = bill.getPriceString(),
             color = Color.Black,
             style = TextStyle(
                 fontSize = 14.sp
@@ -270,7 +316,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
 
         Text(
             text = if (bill.isPaid()) "Pagada" else if (bill.getExpirationDate()!! < Calendar.getInstance().time) "Vencida" else "Pendiente",
-            color = if (bill.isPaid()) Color.Green else if (bill.getExpirationDate()!! < Calendar.getInstance().time) Color.Red else Color(
+            color = if (bill.isPaid()) Color(0xFF068A18) else if (bill.getExpirationDate()!! < Calendar.getInstance().time) Color.Red else Color(
                 0xFFE6A23C
             ),
             style = TextStyle(
@@ -286,7 +332,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuBox(modifier: Modifier = Modifier, items: Array<String?>, placeholder: String?) {
+fun DropdownMenuBox(modifier: Modifier = Modifier, items: Array<String>, placeholder: String, onValueChange: (String) -> Unit = {}){
     var aux = items
 
     if (items.isEmpty()) aux = arrayOf(placeholder)
@@ -327,6 +373,7 @@ fun DropdownMenuBox(modifier: Modifier = Modifier, items: Array<String?>, placeh
                         onClick = {
                             selectedText = item
                             expanded = false
+                            onValueChange(item ?: "")
                         }
                     )
                 }
