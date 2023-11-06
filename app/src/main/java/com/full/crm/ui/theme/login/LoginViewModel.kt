@@ -27,8 +27,11 @@ class LoginViewModel: ViewModel() {
     private val _error = MutableLiveData<String>()
     val error : LiveData<String> = _error
 
-    //TODO: Crear es isloading (para detectar cuando se ha cargado actualizarlo dentro del componible del login)
-    //TODO: Crear el enableLogin (actualizarlo si el email contiene @ y el password es mayor de 7 caracteres)
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading : LiveData<Boolean> = _isLoading
+
+    private val _enableLogin = MutableLiveData<Boolean>()
+    val enableLogin : LiveData<Boolean> = _enableLogin
 
     fun signInWithGoogle(credential: AuthCredential) {
         viewModelScope.launch {
@@ -84,10 +87,18 @@ class LoginViewModel: ViewModel() {
         if (password.length < 8) {
             _password.value = password
         }
+
+        _enableLogin.value = username.isNotEmpty() && password.isNotEmpty() && password.length >= 8 && !_isLoading.value!! && username.contains("@")
+    }
+
+    fun onErrorChanged(error: String){
+        _error.value = error
     }
 
     fun login() {
         viewModelScope.launch {
+            _isLoading.value = true
+
             try{
                 var result = API.service.login(username.value!!, password.value!!)
 
@@ -131,6 +142,8 @@ class LoginViewModel: ViewModel() {
                 Log.i("CRM", e.toString())
                 _error.value = "Lo sentimos nuestros servidores no estan disponibles en estos momentos"
             }
+
+            _isLoading.value = false
         }
     }
 }

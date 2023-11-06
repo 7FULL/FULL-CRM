@@ -14,12 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -50,9 +54,26 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 
+@Composable
+fun Login(loginViewModel: LoginViewModel) {
+    val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = true)
+
+    if (isLoading){
+        Box(
+            Modifier
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center).size(50.dp))
+        }
+    }else{
+        Body(loginViewModel = loginViewModel)
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
+fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
+    val enableLogin: Boolean by loginViewModel.enableLogin.observeAsState(initial = false)
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val username: String by loginViewModel.username.observeAsState(initial = "")
     val error: String by loginViewModel.error.observeAsState(initial = "")
@@ -65,9 +86,29 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
             loginViewModel.signInWithGoogle(credential)
         } catch (e: ApiException) {
-            //TODO: Si el satus code es 7 es que no tine acceso a internet (Poner mensajito)
             //Aqui se pueden ver los codigos de error
             //https://developers.google.com/android/reference/com/google/android/gms/common/api/CommonStatusCodes
+
+            //17 -> Error de red
+            //16 -> Cliente desconectado
+            //20 -> Servidor desconectado
+            //10 -> Error de configuracion de proyecto
+            //13 - 8 - 14 -> Error desconocido
+            //5 -> Cuenta invalida
+            //7 - 22 15 -> Error de red
+
+            //Switch
+            when(e.statusCode){
+                17 -> loginViewModel.onErrorChanged("Parece que hay un error de red, comprueba tu conexion")
+                16 -> loginViewModel.onErrorChanged("Parece que te has desconectado, vuelve a intentarlo")
+                20 -> loginViewModel.onErrorChanged("Parece que el servidor no responde, intentelo mas tarde")
+                10 -> loginViewModel.onErrorChanged("Parece que hay un error de configuracion, contacte con el administrador")
+                13, 8, 14 -> loginViewModel.onErrorChanged("Parece que hay un error desconocido, contacte con el administrador")
+                5 -> loginViewModel.onErrorChanged("Parece que tu cuenta no es valida, contacte con el administrador")
+                7, 22, 15 -> loginViewModel.onErrorChanged("Parece que hay un error de red, comprueba tu conexion")
+                else -> loginViewModel.onErrorChanged("Parece que hay un error desconocido, contacte con el administrador")
+            }
+
             Log.i("CRM", "Inicio de sesion con google fallo", e)
         }
     }
@@ -127,7 +168,7 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
             ){}
         }
-        Box(
+        Button(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(
@@ -135,17 +176,24 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     y = 457.dp
                 )
                 .requiredWidth(width = 263.dp)
-                .requiredHeight(height = 47.dp)
-                .clickable {
+                .requiredHeight(height = 47.dp),
+                onClick = {
                     keyboard?.hide()
                     loginViewModel.login()
-                }
+                },
+            shape = RoundedCornerShape(5.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xff1976d2),
+                contentColor = Color.White,
+                disabledContainerColor = Color(0xFFA0CFFD),
+            ),
+            enabled = enableLogin
         ) {
-            Box(
+            /*Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(shape = RoundedCornerShape(3.dp))
-                    .background(color = Color(0xff1976d2)))
+                    .background(color = Color(0xff1976d2)))*/
             Text(
                 text = "INICIAR SESION",
                 color = Color.White,
@@ -228,6 +276,7 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         ) {
             Text(text = "Development mode only")
         }
+
         Text(
             text = "¿Has olvidado tu contraseña?",
             color = Color(0xff26a69a),
@@ -240,11 +289,13 @@ fun Login(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     x = 3.5.dp,
                     y = 525.dp
                 )
-                .wrapContentHeight(align = Alignment.CenterVertically))
+                .wrapContentHeight(align = Alignment.CenterVertically)
+                .clickable { /* TODO Lanzar email al correo */ }
+        )
         //Texto de error
         Text(
             text = error,
-            //TODO: Preguntar al profe porque el color no se aplica, a capon si se ve bien
+            //TODO: a capon si se ve bien
             color = Color(R.color.cancel),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,

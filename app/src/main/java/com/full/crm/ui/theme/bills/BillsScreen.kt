@@ -12,22 +12,31 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,6 +50,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,6 +59,8 @@ import com.full.crm.OptionsBar
 import com.full.crm.models.Bill
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 var state: String = "Todas"
@@ -59,11 +71,33 @@ var client: String = "Todos"
 fun Bills(billsViewModel: BillsViewModel) {
     val searchBarText: String by billsViewModel.searchBarText.observeAsState("")
     var searchBarActive by rememberSaveable { mutableStateOf(false) }
+    val openAlertDialog = remember { mutableStateOf(false) }
 
     val auxBills: MutableList<Bill> by billsViewModel.auxBills.observeAsState(mutableListOf())
     val searchBills: MutableList<Bill> by billsViewModel.searchBills.observeAsState(mutableListOf())
 
     val clients: Array<String> by billsViewModel.clients.observeAsState(emptyArray())
+
+    val formName: String by billsViewModel.name.observeAsState("")
+    val formPrice: String by billsViewModel.price.observeAsState("")
+    val formClient: String by billsViewModel.clientName.observeAsState("")
+
+    val calendar = Calendar.getInstance()
+    val milSec = calendar.timeInMillis
+
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
+
+    val datePickerEmisionState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = milSec,
+            initialDisplayMode = DisplayMode.Picker
+        )
+
+    val datePickerExpiracionState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = milSec,
+            initialDisplayMode = DisplayMode.Picker
+        )
 
     billsViewModel.initialize()
     Scaffold(
@@ -77,8 +111,8 @@ fun Bills(billsViewModel: BillsViewModel) {
 
         floatingActionButton = {
             FloatingActionButton(onClick =
-            {/* TODO: Añadir el dialogo para crear una factura */
-                billsViewModel.onAddBillClicked()
+            {
+                openAlertDialog.value = true
             },
                 containerColor = Color(0xFF26A69A),
                 contentColor = Color.White
@@ -86,6 +120,181 @@ fun Bills(billsViewModel: BillsViewModel) {
             Text("+", fontSize = 30.sp)
         } },
     ) { padding ->
+        when{
+            openAlertDialog.value -> {
+                val openDialogEmision = remember { mutableStateOf(false) }
+                val openDialogExpiración = remember { mutableStateOf(false) }
+
+                AlertDialog(
+                    title = {
+                        Text(text = "INSERTAR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    },
+                    text = {
+                        Box(){
+
+                            Box() {
+                                Text(text = "Fecha de emisión:", modifier = Modifier.padding(start = 1.dp))
+                                TextField(
+                                    value = formatter.format(Date(datePickerEmisionState.selectedDateMillis!!)),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon =
+                                    {
+                                        IconButton(
+                                            content = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+                                            onClick = {
+                                                openDialogEmision.value = true
+                                            }
+                                        )
+                                    },
+                                    modifier = Modifier.padding(top = 25.dp)
+                                )
+                            }
+
+                            Box(modifier = Modifier.padding(top = 100.dp)) {
+                                Text(text = "Fecha de expiración:", modifier = Modifier.padding(start = 1.dp))
+                                TextField(
+                                    value = formatter.format(Date(datePickerExpiracionState.selectedDateMillis!!)),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon =
+                                    {
+                                        IconButton(
+                                            content = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+                                            onClick = {
+                                                openDialogExpiración.value = true
+                                            }
+                                        )
+                                    },
+                                    modifier = Modifier.padding(top = 25.dp)
+                                )
+                            }
+
+                            Box(modifier = Modifier.padding(top = 200.dp)) {
+                                Text(text = "Precio:", modifier = Modifier.padding(start = 1.dp))
+                                TextField(
+                                    value = formPrice,
+                                    onValueChange = { billsViewModel.onBillFormChanged( it, formName, formClient ) },
+                                    readOnly = false,
+                                    modifier = Modifier.padding(top = 25.dp),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                                )
+                            }
+
+                            Box(modifier = Modifier.padding(top = 300.dp)) {
+                                Text(text = "Nombre:", modifier = Modifier.padding(start = 1.dp))
+                                TextField(
+                                    value = formName,
+                                    onValueChange = { billsViewModel.onBillFormChanged( formPrice, it, formClient ) },
+                                    readOnly = false,
+                                    modifier = Modifier.padding(top = 25.dp)
+                                )
+                            }
+
+                            Box(modifier = Modifier.padding(top = 400.dp)) {
+                                Text(text = "Cliente:", modifier = Modifier.padding(start = 1.dp))
+                                DropdownMenuBox(items = billsViewModel.originalClients.value!!,
+                                    placeholder = "Sin clientes",
+                                    modifier = Modifier.padding(top = 25.dp),
+                                    onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it ) },
+                                )
+                            }
+                            
+                            when{ openDialogEmision.value ->
+                                DatePickerDialog(
+                                    onDismissRequest = {
+                                        openDialogEmision.value = false
+                                    },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                openDialogEmision.value = false
+                                            }
+                                        ) {
+                                            Text("Confirmar")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                openDialogEmision.value = false
+                                            }
+                                        ) {
+                                            Text("Cancelar")
+                                        }
+                                    }
+                                )
+                                {
+                                    DatePicker(state = datePickerEmisionState, headline = {
+                                        Text("Fecha de emisión",
+                                            fontSize = 24.sp,
+                                            modifier = Modifier.padding(bottom = 20.dp, start = 20.dp)
+                                        )
+                                    })
+                                }
+                            }
+
+                            when{ openDialogExpiración.value ->
+                                DatePickerDialog(
+                                    onDismissRequest = {
+                                        openDialogExpiración.value = false
+                                    },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                openDialogExpiración.value = false
+                                            }
+                                        ) {
+                                            Text("Confirmar")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(
+                                            onClick = {
+                                                openDialogExpiración.value = false
+                                            }
+                                        ) {
+                                            Text("Cancelar")
+                                        }
+                                    }
+                                )
+                                {
+                                    DatePicker(state = datePickerExpiracionState, headline = {
+                                        Text("Fecha de emisión",
+                                            fontSize = 24.sp,
+                                            modifier = Modifier.padding(bottom = 20.dp, start = 20.dp)
+                                        )
+                                    })
+                                }
+                            }
+                        }
+                    },
+                    onDismissRequest = {
+                        openAlertDialog.value = false
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                openAlertDialog.value = false
+
+                                billsViewModel.addBill(Date(datePickerEmisionState.selectedDateMillis!!), Date(datePickerExpiracionState.selectedDateMillis!!))
+                            }
+                        ) {
+                            Text("Insertar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                openAlertDialog.value = false
+                            }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
+        }
         Box(modifier = Modifier
             .padding(padding)
             .fillMaxSize(),

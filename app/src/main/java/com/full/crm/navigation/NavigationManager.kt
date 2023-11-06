@@ -17,7 +17,7 @@ object NavigationManager{
     @Composable
     fun InitializeNavigator() {
         instance = rememberNavController()
-        NavHost(navController = instance!!, startDestination = AppScreens.Bills.route)
+        NavHost(navController = instance!!, startDestination = AppScreens.Login.route)
         {
             composable(AppScreens.Login.route) { Login(loginViewModel = LoginViewModel()) }
             composable(AppScreens.Agenda.route) { Agenda(agendyViewModel = AgendyViewModel()) }

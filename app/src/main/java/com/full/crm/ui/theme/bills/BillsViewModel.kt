@@ -43,6 +43,13 @@ class BillsViewModel: ViewModel() {
      */
     val _clients = MutableLiveData<Array<String>>(API.User.value?.getClients()?.map { it.getName() ?: "" }?.toTypedArray() ?: emptyArray())
 
+    /**
+     * Los clientes originales sin modificar ninguno
+     */
+    private val _originalClients = MutableLiveData<Array<String>>(API.User.value?.getClients()?.map { it.getName() ?: "" }?.toTypedArray() ?: emptyArray())
+
+    val originalClients: LiveData<Array<String>> = _originalClients
+
     val clients: LiveData<Array<String>> = _clients
 
     private val _searchBarText = MutableLiveData("")
@@ -57,23 +64,51 @@ class BillsViewModel: ViewModel() {
 
     val client: LiveData<String> = _client
 
-    fun addBill(){
-        //TODO: Cambiar por los datos de los campos
 
-        val client: Client = API.employeeLogged?.getClients()?.get(1) ?: Client()
+    //Datos para insertar factura
+    private val _price = MutableLiveData("")
+    val price: LiveData<String> = _price
+
+    private val _name = MutableLiveData("")
+    val name: LiveData<String> = _name
+
+    private val _clientName = MutableLiveData("")
+
+    val clientName: LiveData<String> = _clientName
+
+    fun onBillFormChanged(price: String, name: String, clientName: String){
+        _price.value = price
+        _name.value = name
+        _clientName.value = clientName
+    }
+
+    fun addBill(expirationDate: Date, emissionDate: Date){
+        val client = auxClients?.find { it.getName().equals(_clientName.value, true) }
+
+        val bill = Bill(
+            emissionDate,
+            expirationDate,
+            BigDecimal(_price.value),
+            false,
+            _name.value,
+            client!!.getId(),
+            API.User.value!!.getId()
+        )
 
         viewModelScope.launch {
-            API.service.addBill(BillRequest(API.employeeLogged!!, client,
-                Bill(
-                    Date(2023,10,1),
-                    Date(2023,11,2),
-                    BigDecimal(5),
-                    true,
-                    "Ejemplo3",
-                    "6542ac44f2004d040d2eb469",
-                    "6542ace220392422f61bfecc"
-                    )))
+            API.service.addBill(
+                BillRequest(
+                    API.employeeLogged!!, client!!, bill
+                )
+            )
         }
+
+        //Añadimos la factura a la lista
+        _bills.value = _bills.value?.toMutableList()?.apply { add(0, bill) }?.toTypedArray()
+
+        //Volvemos a filtrar las facturas por fecha
+        _bills.value = _bills.value?.sortedByDescending { it.getEmisionDate() }?.toTypedArray()
+        filterBills()
     }
 
     //Esta funcion es la encargada de filtrar las facturas segun el filtro de busqueda el filtro de cliente y el filtro de estado
@@ -152,11 +187,6 @@ class BillsViewModel: ViewModel() {
     fun onBillClicked(bill: Bill){
         Log.i("CRM", "Factura pulsada")
         //TODO: Navegar a la factura
-    }
-
-    fun onAddBillClicked() {
-        Log.i("CRM", "Añadir factura pulsado")
-        //TODO: Dialog para añadir factura
     }
 
     fun addClient(nombre: String) {
