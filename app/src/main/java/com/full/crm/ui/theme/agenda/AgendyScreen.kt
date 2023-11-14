@@ -1,12 +1,10 @@
 package com.full.crm.ui.theme.agenda
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -14,13 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.full.crm.OptionsBar
-import com.himanshoe.kalendar.Kalendar
-import com.himanshoe.kalendar.KalendarEvents
-import com.himanshoe.kalendar.KalendarType
-import com.himanshoe.kalendar.color.KalendarColors
-import com.himanshoe.kalendar.ui.component.day.KalendarDayKonfig
-import com.himanshoe.kalendar.ui.firey.DaySelectionMode
-import kotlinx.datetime.LocalDate
 import java.util.Calendar
 
 

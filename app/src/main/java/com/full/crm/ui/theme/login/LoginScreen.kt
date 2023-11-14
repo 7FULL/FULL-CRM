@@ -49,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.full.crm.R
+import com.full.crm.navigation.NavigationManager
+import com.full.crm.network.API
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -267,7 +269,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     )
                     .wrapContentHeight(align = Alignment.CenterVertically))
         }
-        //TODO: Quitar cuando pase a produccion(entregarlo xD)
+        //TODO: Remember to remove it when the app is in production
         Button(
             onClick = {
                 loginViewModel.onLoginChanged("admin", "admin")
@@ -290,12 +292,17 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     y = 525.dp
                 )
                 .wrapContentHeight(align = Alignment.CenterVertically)
-                .clickable { /* TODO Lanzar email al correo */ }
+                .clickable {
+                    NavigationManager.instance!!.navigate("forgotPassword")
+                }
         )
         //Texto de error
         Text(
             text = error,
-            //TODO: a capon si se ve bien
+            /*
+                TODO: Revise this because for some reason if the color is called from the colors.xml it doesn't work
+                 but if its called like this Color(0xFF21301)
+             */
             color = Color(R.color.cancel),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -307,7 +314,6 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         Box(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
-                .padding(bottom = 50.dp)
                 .requiredWidth(width = 263.dp)
                 .requiredHeight(height = 47.dp)
                 .clickable {

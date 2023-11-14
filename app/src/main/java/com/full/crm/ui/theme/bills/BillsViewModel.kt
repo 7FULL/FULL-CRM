@@ -186,7 +186,7 @@ class BillsViewModel: ViewModel() {
 
     fun onBillClicked(bill: Bill){
         Log.i("CRM", "Factura pulsada")
-        //TODO: Navegar a la factura
+        //TODO: Navigate to the bill when the screen its made
     }
 
     fun addClient(nombre: String) {

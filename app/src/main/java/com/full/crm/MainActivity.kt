@@ -127,6 +127,7 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                     modifier = Modifier
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 2) NavigationManager.instance?.navigate("analisis") }
                 )
             }
             Column (

@@ -51,8 +51,11 @@ android {
 }
 
 dependencies {
+    //Gráficas
+    implementation("co.yml:ycharts:2.1.0")
+
     //Mas iconos
-    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
 
     //Navegacion
     implementation("androidx.navigation:navigation-compose:2.7.4")

@@ -37,4 +37,6 @@ object API {
         _user.value = null
         NavigationManager.instance?.navigate("login")
     }
+
+    var token = ""
 }

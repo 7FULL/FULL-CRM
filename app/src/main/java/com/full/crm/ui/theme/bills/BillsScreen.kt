@@ -324,7 +324,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                         Icons.Default.Mic,
                         contentDescription = "Microphone",
                         modifier = Modifier
-                            .clickable { /* TODO: Alomejor implementar la funcionalidad del microfono */ }
+                            .clickable { /* TODO: Maybe implement the function of the microphone */ }
                     )
                 },
             ) {
@@ -467,7 +467,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewMod
                     strokeWidth
                 )
             }
-            .clickable { /* TODO: Navegar a la factura */
+            .clickable { /* TODO: Navigate to the bill when the screen its made */
                 billsViewModel.onBillClicked(bill)
             }
     )
