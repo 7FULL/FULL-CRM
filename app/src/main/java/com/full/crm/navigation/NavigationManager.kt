@@ -1,10 +1,12 @@
 package com.full.crm.navigation
 
+import android.content.pm.ActivityInfo
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.full.crm.LockScreenOrientation
 import com.full.crm.ui.theme.agenda.Agenda
 import com.full.crm.ui.theme.agenda.AgendyViewModel
 import com.full.crm.ui.theme.agenda.Analisis
@@ -29,13 +31,35 @@ object NavigationManager{
 
         NavHost(navController = instance!!, startDestination = AppScreens.Login.route)
         {
-            composable(AppScreens.Login.route) { Login(loginViewModel = LoginViewModel()) }
-            composable(AppScreens.Agenda.route) { Agenda(agendyViewModel = AgendyViewModel()) }
-            composable(AppScreens.Bills.route) { Bills(billsViewModel = BillsViewModel()) }
-            composable(AppScreens.ForgotPassword.route) { ForgotPassword(forgotPasswordViewModel = ForgotPasswordViewModel()) }
-            composable(AppScreens.CheckToken.route) { CheckToken(checkTokenViewModel = CheckTokenViewModel()) }
-            composable(AppScreens.NewPassword.route) { NewPassword(newPasswordViewModel = NewPasswordViewModel()) }
-            composable(AppScreens.Analisis.route) { Analisis(agendyViewModel = AnalisisViewModel()) }
+            composable(AppScreens.Login.route) {
+                Login(loginViewModel = LoginViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Agenda.route) {
+                Agenda(agendyViewModel = AgendyViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Bills.route) {
+                Bills(billsViewModel = BillsViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.ForgotPassword.route) {
+                ForgotPassword(forgotPasswordViewModel = ForgotPasswordViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.CheckToken.route) {
+                CheckToken(checkTokenViewModel = CheckTokenViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.NewPassword.route) {
+                NewPassword(newPasswordViewModel = NewPasswordViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Analisis.route) {
+                Analisis(agendyViewModel = AnalisisViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
         }
     }
 }

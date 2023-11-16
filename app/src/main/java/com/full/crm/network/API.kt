@@ -34,8 +34,8 @@ object API {
     }
 
     fun logout() {
-        _user.value = null
         NavigationManager.instance?.navigate("login")
+        _user.value = null
     }
 
     var token = ""

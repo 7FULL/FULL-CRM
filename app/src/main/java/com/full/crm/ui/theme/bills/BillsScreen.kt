@@ -245,7 +245,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                                                 openDialogExpiración.value = false
                                             }
                                         ) {
-                                            Text("Confirmar")
+                                           Text("Confirmar")
                                         }
                                     },
                                     dismissButton = {
