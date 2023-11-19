@@ -56,9 +56,9 @@ object NavigationManager{
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
             composable(AppScreens.Analisis.route) {
-                Analisis(agendyViewModel = AnalisisViewModel())
-                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-                //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                Analisis(analisisViewModel = AnalisisViewModel())
+                //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }
     }

@@ -9,6 +9,7 @@ import co.yml.charts.common.model.Point
 import com.full.crm.models.Appointment
 import com.full.crm.models.Bill
 import com.full.crm.network.API
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 
@@ -28,13 +29,28 @@ class AnalisisViewModel: ViewModel() {
     private val _last7Days = MutableLiveData<MutableList<Date>>(mutableListOf())
     val last7Days: LiveData<MutableList<Date>> = _last7Days
 
-    private val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-    private val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
-
     private val _dataPoints = MutableLiveData<Array<Point>>(initialize())
     val dataPoints: LiveData<Array<Point>> = _dataPoints
 
     fun initialize(): Array<Point>{
+        val calendar = Calendar.getInstance()
+
+        val endDate = calendar.timeInMillis
+
+        calendar.add(Calendar.DAY_OF_YEAR, -7)
+
+        val startDate = calendar.timeInMillis
+
+        return updateDataPoints(startDate, endDate)
+    }
+
+    fun updateDataPoints(startDate: Long, endDate: Long): Array<Point> {
+        //Limpiamos los puntos de la grafica
+        pointsDataPayments.clear()
+        pointsDataLosses.clear()
+        pointsDataGains.clear()
+        _last7Days.value!!.clear()
+
         //Añadimos el punto de inicio
         pointsDataPayments.add(0, Point(0f, 0f))
         pointsDataGains.add(0, Point(0f, 0f))
@@ -42,51 +58,44 @@ class AnalisisViewModel: ViewModel() {
 
         _last7Days.value!!.add(0, Date())
 
+        val startCalendar = Calendar.getInstance()
+        startCalendar.time = Date(startDate)
+
+        val endCalendar = Calendar.getInstance()
+        endCalendar.time = Date(endDate)
+
         //Obtenemos los ultimos 7 dias en los que se haya emitido una factura
         bills!!.forEach {
             val date = it.getEmisionDate()!!
             val calendar = Calendar.getInstance()
             calendar.time = date
 
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_YEAR)
 
-            if (month == currentMonth) {
-                if (day >= currentDay - 15) {
-                    _last7Days.value!!.add(date)
+            if (day >= startCalendar.get(Calendar.DAY_OF_YEAR) && day <= endCalendar.get(Calendar.DAY_OF_YEAR)) {
+                _last7Days.value!!.add(date)
+
+                val bill = it
+
+                if (bill.isPaid()) {
+                    pointsDataPayments.add(Point(pointsDataPayments.size.toFloat(), bill.getPrice()!!.toFloat()))
+                    pointsDataGains.add(Point(pointsDataGains.size.toFloat(), bill.getPrice()!!.toFloat()))
+                }
+
+                if (!bill.isPaid()){
+                    pointsDataLosses.add(Point(pointsDataLosses.size.toFloat(), bill.getPrice()!!.toFloat()))
+                    pointsDataGains.add(Point(pointsDataGains.size.toFloat(), -bill.getPrice()!!.toFloat()))
                 }
             }
         }
 
-        bills.forEachIndexed { index, bill ->
-            //Si la factura se ha emitido en los ultimos 7 dias
-            if(_last7Days.value!!.contains(bill.getEmisionDate())) {
-                if (bill.isPaid()) pointsDataPayments.add(Point(pointsDataPayments.size.toFloat(), bill.getPrice()!!.toFloat()))
-
-                if (!bill.isPaid()) pointsDataLosses.add(Point(pointsDataLosses.size.toFloat(), bill.getPrice()!!.toFloat()))
-
-                if (bill.isPaid()) pointsDataGains.add(Point(pointsDataGains.size.toFloat(), bill.getPrice()!!.toFloat()))
-
-                if (!bill.isPaid()) pointsDataGains.add(Point(pointsDataGains.size.toFloat(), -bill.getPrice()!!.toFloat()))
-            }
+        try {
+            _dataPoints.value = pointsDataGains.toTypedArray()
+        }catch (NullPointerException: NullPointerException){
+            // Hacemos este trycatch porque al llamar desde la inicializacion del live data,
+            // el valor de pointsDataGains es null sin embargo al llamar a la funcion
         }
-
-        /*
-        //Imprimimos los puntos de la grafica
-        pointsDataGains.forEach {
-            Log.i("CRM", "x: " + it.x + " y: " + it.y)
-        }
-
-        //Imprimimos los 7 dias
-        _last7Days.value!!.forEach {
-            Log.i("CRM", it.toString())
-        }
-        */
 
         return pointsDataGains.toTypedArray()
-    }
-
-    fun onModeChanged(){
-
     }
 }
