@@ -131,13 +131,23 @@ class BillsViewModel: ViewModel() {
         //Si actualizamos aqui noi se apolican los demas filtros que es lo que queremos
         _searchBills.value = aux
 
-        //Filtramos por cliente
-        val client = client.value ?: ""
+        //Filtramos por cliente y si somos administradores filtramos por empleado
+        if (API.isAdministrator){
+            val client = client.value ?: ""
 
-        if (client.equals("Todos", true)){
-            aux = aux.toMutableList()
-        } else {
-            aux = aux.filter { it.getClientID().equals(auxClients?.find { it.getName().equals(client, true) }?.getId(), true) }.toMutableList()
+            if (client.equals("Todos", true)){
+                aux = aux.toMutableList()
+            } else {
+                aux = aux.filter { it.getEmployeeID().equals(auxClients?.find { it.getName().equals(client, true) }?.getId(), true) }.toMutableList()
+            }
+        }else{
+            val client = client.value ?: ""
+
+            if (client.equals("Todos", true)){
+                aux = aux.toMutableList()
+            } else {
+                aux = aux.filter { it.getClientID().equals(auxClients?.find { it.getName().equals(client, true) }?.getId(), true) }.toMutableList()
+            }
         }
 
         //Filtramos por estado

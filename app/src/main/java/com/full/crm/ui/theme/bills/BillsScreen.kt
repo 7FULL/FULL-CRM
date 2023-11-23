@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -100,7 +101,7 @@ fun Bills(billsViewModel: BillsViewModel) {
             initialDisplayMode = DisplayMode.Picker
         )
 
-
+    billsViewModel.initialize()
     Scaffold(
         bottomBar =
         {
@@ -417,6 +418,94 @@ fun Bills(billsViewModel: BillsViewModel) {
                                     .fillMaxWidth()
                             )
                         }else{
+                            item{
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .requiredHeight(height = 50.dp)
+                                        .drawBehind {
+
+                                            val strokeWidth = 1f * density
+                                            val y = size.height - strokeWidth / 2
+
+                                            drawLine(
+                                                Color.Black,
+                                                Offset(0f, y),
+                                                Offset(size.width, y),
+                                                strokeWidth
+                                            )
+                                        }
+                                )
+                                {
+
+                                    Text(
+                                        text = "Nombre",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        style = TextStyle(
+                                            fontSize = 14.sp
+                                        ),
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .wrapContentHeight(align = Alignment.CenterVertically)
+                                    )
+
+                                    Text(
+                                        text = "Vencimiento",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        style = TextStyle(
+                                            fontSize = 14.sp
+                                        ),
+                                        modifier = Modifier
+                                            .align(alignment = Alignment.Center)
+                                            .padding(start = 35.dp)
+                                            .fillMaxHeight()
+                                            .wrapContentHeight(align = Alignment.CenterVertically)
+                                    )
+
+                                    Text(
+                                        text = "Emisión",
+                                        color = Color.Black,
+                                        style = TextStyle(
+                                            fontSize = 14.sp
+                                        ),
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier
+                                            .align(alignment = Alignment.Center)
+                                            .padding(end = 110.dp)
+                                            .fillMaxHeight()
+                                            .wrapContentHeight(align = Alignment.CenterVertically)
+                                    )
+
+                                    Text(
+                                        text = "Precio",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        style = TextStyle(
+                                            fontSize = 14.sp
+                                        ),
+                                        modifier = Modifier
+                                            .align(alignment = Alignment.CenterEnd)
+                                            .padding(end = 75.dp)
+                                            .fillMaxHeight()
+                                            .wrapContentHeight(align = Alignment.CenterVertically)
+                                    )
+
+                                    Text(
+                                        text = "Estado",
+                                        fontWeight = FontWeight.Bold,
+                                        style = TextStyle(
+                                            fontSize = 14.sp
+                                        ),
+                                        modifier = Modifier
+                                            .align(alignment = Alignment.CenterEnd)
+                                            .fillMaxHeight()
+                                            .wrapContentHeight(align = Alignment.CenterVertically)
+                                    )
+                                }
+                            }
+
                             items(auxBills.size) { idx ->
                                 Bill(auxBills[idx], modifier = Modifier
                                     .fillMaxWidth(), billsViewModel)
@@ -479,7 +568,12 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewMod
     {
 
         Text(
-            text = bill.getName()?: "Sin nombre",
+            text =
+            if(bill.getName()!!.length> 12){
+                bill.getName()!!.substring(0, 12)+ "..."
+            }else{
+                bill.getName()?: "Sin nombre"
+                 },
             color = Color.Black,
             style = TextStyle(
                 fontSize = 14.sp
@@ -497,7 +591,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewMod
             ),
             modifier = Modifier
                 .align(alignment = Alignment.Center)
-                .padding(start = 50.dp)
+                .padding(start = 35.dp)
                 .fillMaxHeight()
                 .wrapContentHeight(align = Alignment.CenterVertically)
         )
@@ -510,7 +604,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewMod
             ),
             modifier = Modifier
                 .align(alignment = Alignment.Center)
-                .padding(end = 50.dp)
+                .padding(end = 110.dp)
                 .fillMaxHeight()
                 .wrapContentHeight(align = Alignment.CenterVertically)
         )

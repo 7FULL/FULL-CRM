@@ -163,8 +163,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                     min.toString()
                 } else if (i == steps ) {
                     max.toString()
-                } else {
-                    max!!.div(steps).times(i).toString()
+                }else{
+                    ""
                 }
             }.build()
 
@@ -210,14 +210,32 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                 }
             }
 
-            item{
-                Box(modifier = Modifier.padding(top = 0.dp)) {
-                    LineChart(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp),
-                        lineChartData = lineChartData
-                    )
+            if(dataPoints.size > 1){
+                item{
+                    Box(modifier = Modifier.padding(top = 0.dp)) {
+                        LineChart(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp),
+                            lineChartData = lineChartData
+                        )
+                    }
+                }
+            }else{
+                item{
+                    Box(modifier = Modifier.padding(top = 0.dp).height(250.dp)) {
+                        Text(
+                            text = "No hay datos para mostrar",
+                            color = Color.Black,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 32.sp,
+                            modifier = Modifier
+                                .align(alignment = Alignment.Center)
+                                .background(color = Color.White)
+                                .fillMaxWidth()
+                        )
+                    }
                 }
             }
 
