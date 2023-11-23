@@ -11,12 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -98,7 +103,16 @@ fun ForgotPassword(modifier: Modifier = Modifier, forgotPasswordViewModel: Forgo
                 shape = RoundedCornerShape(35.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFEFEFE)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
-            ){}
+            ){
+                Box(Modifier.fillMaxSize()){
+                    Icon(
+                        Icons.Default.Info, contentDescription = "Login",
+                        modifier = Modifier.size(75.dp)
+                            .align(alignment = Alignment.Center),
+                        tint = Color(0xff1976d2)
+                    )
+                }
+            }
         }
         Button(
             modifier = Modifier
@@ -153,11 +167,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, forgotPasswordViewModel: Forgo
         //Texto de error
         Text(
             text = error,
-            /*
-                TODO: Revise this because for some reason if the color is called from the colors.xml it doesn't work
-                 but if its called like this Color(0xFF21301)
-             */
-            color = Color(R.color.cancel),
+            color = Color(0xFF21301),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             modifier = Modifier

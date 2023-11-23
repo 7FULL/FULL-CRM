@@ -55,7 +55,7 @@ dependencies {
     implementation("co.yml:ycharts:2.1.0")
 
     //Para el selector de colores
-    //implementation("com.github.skydoves:colorpicker-compose:1.0.5")
+    implementation("com.github.skydoves:colorpicker-compose:1.0.0")
 
     //Mas iconos
     implementation("androidx.compose.material:material-icons-extended:1.5.4")

@@ -37,7 +37,7 @@ class AnalisisViewModel: ViewModel() {
 
         val endDate = calendar.timeInMillis
 
-        calendar.add(Calendar.DAY_OF_YEAR, -7)
+        calendar.add(Calendar.DAY_OF_YEAR, - 31)
 
         val startDate = calendar.timeInMillis
 

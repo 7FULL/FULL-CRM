@@ -3,6 +3,8 @@ package com.full.crm.network
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.full.crm.models.Employee
+import com.full.crm.models.Role
+import com.full.crm.models.User
 import com.full.crm.navigation.NavigationManager
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -23,11 +25,14 @@ object API {
         retrofit.create(ApiService::class.java)
     }
 
+    val isAdministrator: Boolean
+        get() = User.value?.getRole() == Role.MANAGER || User.value?.getRole() == Role.ADMIN
+
     private val _user: MutableLiveData<Employee> = MutableLiveData<Employee>()
     val User: LiveData<Employee> = _user
 
-    val employeeLogged: Employee?
-        get() = _user.value
+    val employeeLogged: Employee
+        get() = _user.value as Employee
 
     fun setUser(employee: Employee) {
         _user.value = employee
@@ -35,6 +40,9 @@ object API {
 
     fun logout() {
         NavigationManager.instance?.navigate("login")
+
+        //Espremoas 1 segundo para que de tiempo a que se cambie de pantalla
+        Thread.sleep(1000)
         _user.value = null
     }
 

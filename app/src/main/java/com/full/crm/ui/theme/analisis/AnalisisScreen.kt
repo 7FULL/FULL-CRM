@@ -1,18 +1,27 @@
 package com.full.crm.ui.theme.agenda
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -33,13 +43,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.linechart.LineChart
@@ -53,6 +71,13 @@ import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.full.crm.OptionsBar
+import com.full.crm.ui.theme.bills.DropdownMenuBox
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.ColorEnvelope
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -60,7 +85,7 @@ import java.util.Date
 import java.util.Locale
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel) {
     //Numero de pasos en el eje Y
@@ -76,16 +101,22 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
         alpha = 0.5f
     )
 
+    val color = remember { mutableStateOf(Color(0xFF077FD5)) }
+
+    val colorString = remember { mutableStateOf("#FF077FD5") }
+
+    val activeColorPicker = remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
 
     val calendar = Calendar.getInstance()
     val milSec = calendar.timeInMillis
-    val milSec7Days = milSec - 604800000
+    val milSec31Days = calendar.timeInMillis - 2678400000
 
     val datePickerEmisionState =
         rememberDateRangePickerState(
             initialSelectedEndDateMillis = milSec,
-            initialSelectedStartDateMillis = milSec7Days,
+            initialSelectedStartDateMillis = milSec31Days,
             initialDisplayMode = DisplayMode.Picker
         )
 
@@ -142,11 +173,11 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                 lines = listOf(
                     Line(
                         dataPoints = dataPoints.toList(),
-                        LineStyle(color = Color(0xFF0095FF)),
+                        LineStyle(color = color.value),
                         //Estos son los puntos que se verian en las intersecciones de las lineas si no estuviesen transparentes
                         IntersectionPoint(color = Color(0x95FF)),
-                        SelectionHighlightPoint(color = Color(0xFF0095FF)),
-                        ShadowUnderLine(color = Color(0xFF0095FF)),
+                        SelectionHighlightPoint(color = color.value),
+                        ShadowUnderLine(color = color.value),
                         SelectionHighlightPopUp(
                             popUpLabel =
                             {
@@ -256,11 +287,113 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                 }
             }
 
-            /*
             item{
-                Spacer(modifier = Modifier.requiredHeight(height = 75.dp))
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 25.dp)){
+                    Button(
+                        onClick = { activeColorPicker.value = true },
+                        shape = RoundedCornerShape(5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xff26A69A),
+                            contentColor = Color.White,
+                        ),
+                        modifier = Modifier
+                            .align(alignment = Alignment.Center)
+                            .padding(end = 150.dp)
+                    ) {
+                        Text(text = "Cambiar Color")
+                    }
+                    Box(modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .padding(start = 150.dp)){
+                        AlphaTile(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { activeColorPicker.value = true }
+                                .border(2.dp, Color.Black)
+                                .align(alignment = Alignment.Center),
+                            selectedColor = color.value,
+                        )
+                        Text(
+                            text = colorString.value,
+                            modifier = Modifier
+                                .align(alignment = Alignment.Center)
+                                .clickable { activeColorPicker.value = true },
+                            color = Color.White, fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
-            */
+            
+            item{
+
+                if(activeColorPicker.value){
+
+                    AlertDialog(
+                        title = {
+                            Text(text = "SELECCIONA COLOR", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        },
+                        text =
+                        {
+                            val controller = rememberColorPickerController()
+
+                            Box(modifier = Modifier.fillMaxWidth()){
+                                HsvColorPicker(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(450.dp)
+                                        .padding(10.dp),
+                                    controller = controller,
+                                    onColorChanged = { colorEnvelope: ColorEnvelope ->
+                                        color.value = colorEnvelope.color
+                                        colorString.value = colorEnvelope.hexCode
+                                    }
+                                )
+
+                                AlphaTile(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .padding(top = 100.dp)
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .align(alignment = Alignment.Center),
+                                    controller = controller,
+                                )
+                            }
+                        },
+                        onDismissRequest = { activeColorPicker.value = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    activeColorPicker.value = false
+                                }
+                            ) {
+                                Text("Aceptar")
+                            }
+                        },
+                    )
+                }
+
+            }
+            
+            item{
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(50.dp)){
+                    Button(
+                        onClick = { /* TODO: Navegar a fullscreen */ },
+                        shape = RoundedCornerShape(5.dp),
+                        modifier = Modifier.fillMaxWidth()
+                        ) {
+                        Text(text = "PANTALLA COMPLETA")
+                        Icon(Icons.Default.Fullscreen, contentDescription = "Pantalla completa",
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

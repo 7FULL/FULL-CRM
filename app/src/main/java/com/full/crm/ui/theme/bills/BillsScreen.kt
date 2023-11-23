@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.full.crm.OptionsBar
 import com.full.crm.models.Bill
+import com.full.crm.network.API
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -99,7 +100,7 @@ fun Bills(billsViewModel: BillsViewModel) {
             initialDisplayMode = DisplayMode.Picker
         )
 
-    billsViewModel.initialize()
+
     Scaffold(
         bottomBar =
         {
@@ -109,16 +110,20 @@ fun Bills(billsViewModel: BillsViewModel) {
             )
         },
 
-        floatingActionButton = {
-            FloatingActionButton(onClick =
-            {
-                openAlertDialog.value = true
-            },
-                containerColor = Color(0xFF26A69A),
-                contentColor = Color.White
-            ){
-            Text("+", fontSize = 30.sp)
-        } },
+        floatingActionButton =
+        {
+            if(!API.isAdministrator){
+                FloatingActionButton(onClick =
+                {
+                    openAlertDialog.value = true
+                },
+                    containerColor = Color(0xFF26A69A),
+                    contentColor = Color.White
+                ){
+                    Text("+", fontSize = 30.sp)
+                }
+            }
+        },
     ) { padding ->
         when{
             openAlertDialog.value -> {
@@ -467,7 +472,7 @@ fun Bill(bill: Bill, modifier: Modifier = Modifier, billsViewModel: BillsViewMod
                     strokeWidth
                 )
             }
-            .clickable { /* TODO: Navigate to the bill when the screen its made */
+            .clickable {
                 billsViewModel.onBillClicked(bill)
             }
     )

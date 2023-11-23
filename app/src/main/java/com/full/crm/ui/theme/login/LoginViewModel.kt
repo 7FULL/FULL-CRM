@@ -88,7 +88,7 @@ class LoginViewModel: ViewModel() {
             _password.value = password
         }
 
-        _enableLogin.value = username.isNotEmpty() && password.isNotEmpty() && password.length >= 8 && !_isLoading.value!! && username.contains("@")
+        _enableLogin.value = username.isNotEmpty() && password.isNotEmpty() && password.length >= 8 && !_isLoading.value!!
     }
 
     fun onErrorChanged(error: String){

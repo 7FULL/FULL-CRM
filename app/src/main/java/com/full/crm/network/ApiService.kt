@@ -62,4 +62,10 @@ interface ApiService {
 
     @POST("api/employee/newPassword")
     suspend fun newPassword(@Query("token") token: String, @Query("password") password: String): Response<DataResponse<String>>
+
+    @GET("api/bill/getBills")
+    suspend fun getBills(): Response<DataResponse<Array<Bill>>>
+
+    @GET("api/client/getClients")
+    suspend fun getClients(): Response<DataResponse<Array<Client>>>
 }

@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.AssuredWorkload
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Search
@@ -48,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.full.crm.models.Role
 import com.full.crm.navigation.NavigationManager
 import com.full.crm.network.API
 import com.full.crm.ui.theme.CRMTheme
@@ -88,6 +90,25 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                 .background(color = Color(0xFF1976D2))
                 .border(border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.51f))))
         Row(modifier.fillMaxWidth()){
+            if (API.isAdministrator) {
+                Column (
+                    modifier = modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ){
+                    Icon(
+                        tint = if (selectedIcon == 4) Color(R.color.primaryDescendant) else Color.White,
+                        imageVector = Icons.Rounded.AssuredWorkload,
+                        contentDescription = "Vector",
+                        modifier = Modifier
+                            .size(size = 50.dp)
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .clickable { if (selectedIcon != 4) NavigationManager.instance?.navigate("administration") }
+                    )
+                }
+
+            }
+
             Column (
                 modifier = modifier
                     .weight(1f)

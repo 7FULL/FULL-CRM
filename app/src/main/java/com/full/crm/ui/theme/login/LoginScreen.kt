@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,12 +20,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -40,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -65,7 +70,10 @@ fun Login(loginViewModel: LoginViewModel) {
             Modifier
                 .fillMaxSize()
         ) {
-            CircularProgressIndicator(Modifier.align(Alignment.Center).size(50.dp))
+            CircularProgressIndicator(
+                Modifier
+                    .align(Alignment.Center)
+                    .size(50.dp))
         }
     }else{
         Body(loginViewModel = loginViewModel)
@@ -130,7 +138,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(y = (-100).dp)
-                .requiredWidth(width = 427.dp)
+                .requiredWidth(width = 500.dp)
                 .requiredHeight(height = 450.dp)
                 .clip(shape = RoundedCornerShape(71.dp))
                 .background(
@@ -168,7 +176,17 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 shape = RoundedCornerShape(35.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFEFEFE)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 50.dp)
-            ){}
+            ){
+                Box(Modifier.fillMaxSize()){
+                    Icon(
+                        Icons.Default.Login, contentDescription = "Login",
+                        modifier = Modifier
+                            .size(75.dp)
+                            .align(alignment = Alignment.Center),
+                        tint = Color(0xff1976d2)
+                    )
+                }
+            }
         }
         Button(
             modifier = Modifier
@@ -272,11 +290,21 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         //TODO: Remember to remove it when the app is in production
         Button(
             onClick = {
-                loginViewModel.onLoginChanged("admin", "admin")
+                loginViewModel.onLoginChanged("admin", "678041577")
                 loginViewModel.login()
             }
         ) {
-            Text(text = "Development mode only")
+            Text(text = "Empleado")
+        }
+
+        Button(
+            modifier = Modifier.padding(start = 200.dp),
+            onClick = {
+                loginViewModel.onLoginChanged("admin2", "678041577")
+                loginViewModel.login()
+            }
+        ) {
+            Text(text = "Admin")
         }
 
         Text(
@@ -299,11 +327,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         //Texto de error
         Text(
             text = error,
-            /*
-                TODO: Revise this because for some reason if the color is called from the colors.xml it doesn't work
-                 but if its called like this Color(0xFF21301)
-             */
-            color = Color(R.color.cancel),
+            color = Color(0x99F21301),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
             modifier = Modifier
@@ -359,7 +383,9 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                     modifier = Modifier
                         .requiredSize(size = 37.dp)
                         .clip(shape = CircleShape)
-                        .background(color = Color(0xffd9d9d9)))
+){
+                    Image(painter = painterResource(id = R.drawable.logogoogle_removebg), contentDescription = "Logo google")
+                }
             }
         }
     }
