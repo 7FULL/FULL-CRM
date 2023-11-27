@@ -46,7 +46,7 @@ class LoginViewModel: ViewModel() {
                         Log.i("CRM", email)
 
                         viewModelScope.launch {
-                            var result = API.service.login(email!!, "")
+                            var result = API.service.login(email!!, "678041577")
 
                             if (result.isSuccessful) {
                                 val data: DataResponse<Employee> = result.body()!!

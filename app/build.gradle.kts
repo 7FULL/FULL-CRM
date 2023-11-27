@@ -51,6 +51,9 @@ android {
 }
 
 dependencies {
+    //WorkRunTime
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+
     //Gráficas
     implementation("co.yml:ycharts:2.1.0")
 

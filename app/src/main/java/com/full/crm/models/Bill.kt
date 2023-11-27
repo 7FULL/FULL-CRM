@@ -1,6 +1,6 @@
 package com.full.crm.models
 
-import com.full.crm.network.IsoDateTimeSerializer
+import com.full.crm.utils.IsoDateTimeSerializer
 import com.google.gson.annotations.JsonAdapter
 import java.math.BigDecimal
 import java.math.RoundingMode

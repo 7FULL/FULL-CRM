@@ -370,11 +370,33 @@ fun Bills(billsViewModel: BillsViewModel) {
                         .background(color = Color.White)
                         .fillMaxWidth()
                 )
+                Box(){
+                    Text(
+                        text = if (API.isAdministrator) "Empleados" else "Clientes",
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .align(alignment = Alignment.TopCenter)
+                            .padding(top = 185.dp, end = 125.dp)
+                            .background(color = Color.White)
+                    )
+                    Text(
+                        text = "Estado",
+                        color = Color.Black,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .align(alignment = Alignment.TopCenter)
+                            .padding(top = 185.dp, start = 240.dp)
+                            .background(color = Color.White)
+                    )
+                }
                 DropdownMenuBox(
                     modifier = Modifier
                         .width(175.dp)
                         .align(alignment = Alignment.TopStart)
-                        .padding(top = 175.dp), items = clients,
+                        .padding(top = 225.dp), items = clients,
                     placeholder = "Sin clientes"
                 ) { value ->
                     client = value
@@ -385,7 +407,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                     modifier = Modifier
                         .width(175.dp)
                         .align(alignment = Alignment.TopEnd)
-                        .padding(top = 175.dp), items = arrayOf("Todas", "Pagada", "Pendiente", "Vencida"),
+                        .padding(top = 225.dp), items = arrayOf("Todas", "Pagada", "Pendiente", "Vencida"),
                     placeholder = "Esto es un error"
                 ) { value ->
                     state = value
@@ -395,7 +417,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                 Box(
                     modifier = Modifier
                         .align(alignment = Alignment.TopCenter)
-                        .padding(top = 350.dp)
+                        .padding(top = 450.dp)
                         .requiredWidth(width = 360.dp)
                         .requiredHeight(height = 684.dp)
                 ) {
@@ -510,6 +532,13 @@ fun Bills(billsViewModel: BillsViewModel) {
                                 Bill(auxBills[idx], modifier = Modifier
                                     .fillMaxWidth(), billsViewModel)
                             }
+
+                            /*
+                            items(auxBills.size) { idx ->
+                                Bill(auxBills[idx], modifier = Modifier
+                                    .fillMaxWidth(), billsViewModel)
+                            }
+                            */
                         }
                     }
                 }

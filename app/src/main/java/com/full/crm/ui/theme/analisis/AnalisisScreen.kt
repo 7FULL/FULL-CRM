@@ -1,5 +1,10 @@
 package com.full.crm.ui.theme.agenda
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -58,6 +64,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.net.toUri
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.linechart.LineChart
@@ -71,7 +86,14 @@ import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.full.crm.OptionsBar
+import com.full.crm.navigation.AppScreens
+import com.full.crm.navigation.NavigationManager
+import com.full.crm.network.API
 import com.full.crm.ui.theme.bills.DropdownMenuBox
+import com.full.crm.utils.CustomFile
+import com.full.crm.utils.FileDownloadWorker
+import com.full.crm.utils.FileParams
+import com.full.crm.utils.ItemFile
 import com.github.skydoves.colorpicker.compose.AlphaSlider
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
@@ -79,6 +101,7 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -100,6 +123,87 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
         ),
         alpha = 0.5f
     )
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == 200) {
+            Toast.makeText(context, "Descargando archivo", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val pdfFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "1",
+                name = "Archivo PDF",
+                type = "PDF",
+                url = analisisViewModel.export("PDF")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val jsonFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "2",
+                name = "Archivo JSON",
+                type = "JSON",
+                url = analisisViewModel.export("JSON")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val xmlFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "3",
+                name = "Archivo XML",
+                type = "XML",
+                url = analisisViewModel.export("XML")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val csvFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "4",
+                name = "Archivo CSV",
+                type = "CSV",
+                url = analisisViewModel.export("CSV")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val docxFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "5",
+                name = "Archivo DOCX",
+                type = "DOCX",
+                url = analisisViewModel.export("DOCX")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val txtFile = remember {
+        mutableStateOf(
+            CustomFile(
+                id = "5",
+                name = "Archivo TXT",
+                type = "TXT",
+                url = analisisViewModel.export("TXT")!!,
+                downloadedUri = null
+            )
+        )
+    }
+
+    val exportPopUp = remember { mutableStateOf(false) }
 
     val color = remember { mutableStateOf(Color(0xFF077FD5)) }
 
@@ -160,9 +264,9 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
             .labelAndAxisLinePadding(20.dp)
             .labelData { i ->
                 if (i == 0) {
-                    min.toString()
+                    min.toString() + "€"
                 } else if (i == steps ) {
-                    max.toString()
+                    max.toString() + "€"
                 }else{
                     ""
                 }
@@ -181,7 +285,7 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                         SelectionHighlightPopUp(
                             popUpLabel =
                             {
-                                    _, y -> y.toString()
+                                    _, y -> y.toString() + "€"
                             }
                         )
                     )
@@ -223,7 +327,9 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                 }
             }else{
                 item{
-                    Box(modifier = Modifier.padding(top = 0.dp).height(250.dp)) {
+                    Box(modifier = Modifier
+                        .padding(top = 0.dp)
+                        .height(250.dp)) {
                         Text(
                             text = "No hay datos para mostrar",
                             color = Color.Black,
@@ -291,7 +397,7 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
             item{
                 Box(modifier = Modifier.fillMaxWidth()){
                     Button(
-                        onClick = { /*TODO: EXPORTAR*/ },
+                        onClick = { exportPopUp.value = true },
                         shape = RoundedCornerShape(5.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xff26A69A),
@@ -302,6 +408,286 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                     ) {
                         Text(text = "EXPORTAR")
                     }
+                }
+
+                if(exportPopUp.value){
+                    val value = remember { mutableStateOf("") }
+
+                    AlertDialog(
+                        title = {
+                            Text(text = "EXPORTAR", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        },
+                        text =
+                        {
+                            Column(modifier = Modifier.fillMaxWidth()){
+                                ItemFile(
+                                    file = pdfFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = pdfFile.value,
+                                            success = {
+                                                pdfFile.value = pdfFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                pdfFile.value = pdfFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                pdfFile.value = pdfFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/pdf")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.requiredHeight(10.dp))
+
+                                ItemFile(
+                                    file = csvFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = csvFile.value,
+                                            success = {
+                                                csvFile.value = csvFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                csvFile.value = csvFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                csvFile.value = csvFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/csv")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.requiredHeight(10.dp))
+
+                                ItemFile(
+                                    file = docxFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = docxFile.value,
+                                            success = {
+                                                docxFile.value = docxFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                docxFile.value = docxFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                docxFile.value = docxFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/docx")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.requiredHeight(10.dp))
+
+                                ItemFile(
+                                    file = xmlFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = xmlFile.value,
+                                            success = {
+                                                xmlFile.value = xmlFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                xmlFile.value = xmlFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                xmlFile.value = xmlFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/xml")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.requiredHeight(10.dp))
+
+                                ItemFile(
+                                    file = jsonFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = jsonFile.value,
+                                            success = {
+                                                jsonFile.value = jsonFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                jsonFile.value = jsonFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                jsonFile.value = jsonFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/docx")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.requiredHeight(10.dp))
+
+                                ItemFile(
+                                    file = txtFile.value,
+                                    startDownload = {
+                                        API.mainActivity!!.startDownloadingFile(
+                                            file = txtFile.value,
+                                            success = {
+                                                txtFile.value = txtFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = it
+                                                }
+                                            },
+                                            failed = {
+                                                txtFile.value = txtFile.value.copy().apply {
+                                                    isDownloading = false
+                                                    downloadedUri = null
+                                                }
+                                            },
+                                            running = {
+                                                txtFile.value = txtFile.value.copy().apply {
+                                                    isDownloading = true
+                                                }
+                                            },
+                                            workManager = WorkManager.getInstance(context),
+                                        )
+                                    },
+                                    openFile = {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        intent.setDataAndType(it.downloadedUri?.toUri(),"application/docx")
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        try {
+                                            startActivity(context, intent, null)
+                                        }catch (e: ActivityNotFoundException){
+                                            Toast.makeText(
+                                                context,
+                                                "No se puede abrir el archivo",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                )
+                            }
+                        },
+                        onDismissRequest = { exportPopUp.value = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    exportPopUp.value = false
+                                }
+                            ) {
+                                Text("Aceptar")
+                            }
+                        }
+                    )
                 }
             }
 
@@ -347,9 +733,7 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
             }
             
             item{
-
                 if(activeColorPicker.value){
-
                     AlertDialog(
                         title = {
                             Text(text = "SELECCIONA COLOR", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -401,7 +785,7 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                     .fillMaxWidth()
                     .padding(50.dp)){
                     Button(
-                        onClick = { /* TODO: Navegar a fullscreen */ },
+                        onClick = { NavigationManager.instance?.navigate(AppScreens.AnalisisFullScreen.route) },
                         shape = RoundedCornerShape(5.dp),
                         modifier = Modifier.fillMaxWidth()
                         ) {

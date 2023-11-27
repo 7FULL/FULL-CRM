@@ -6,10 +6,12 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -49,18 +51,45 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.full.crm.models.Role
 import com.full.crm.navigation.NavigationManager
 import com.full.crm.network.API
 import com.full.crm.ui.theme.CRMTheme
+import com.full.crm.utils.CustomFile
+import com.full.crm.utils.FileDownloadWorker
+import com.full.crm.utils.FileParams
 import com.himanshoe.kalendar.Kalendar
 import com.himanshoe.kalendar.KalendarType
 import kotlinx.datetime.LocalDate
 
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var requestMultiplePermission: ActivityResultLauncher<Array<String>>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        API.mainActivity = this
+
+        requestMultiplePermission = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ){
+            var isGranted = false
+            it.forEach { s, b ->
+                isGranted = b
+
+                if (!isGranted){
+                    //Toast.makeText(this, "Permiso: ${s} no concedido", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         setContent {
             CRMTheme {
@@ -68,12 +97,74 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    requestMultiplePermission.launch(
+                        arrayOf(
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            android.Manifest.permission.INTERNET,
+                            android.Manifest.permission.POST_NOTIFICATIONS,
+                        )
+                    )
+
                     NavigationManager.InitializeNavigator()
 
                     //Kalendar(currentDay = LocalDate(1,1,1), kalendarType = KalendarType.Oceanic)
                 }
             }
         }
+    }
+
+    fun startDownloadingFile(
+        file: CustomFile,
+        success:(String) -> Unit,
+        failed:(String) -> Unit,
+        running:() -> Unit,
+        workManager: WorkManager
+    ) {
+        val data = Data.Builder()
+
+        data.apply {
+            putString(FileParams.KEY_FILE_NAME, file.name)
+            putString(FileParams.KEY_FILE_URL, file.url.toString())
+            putString(FileParams.KEY_FILE_TYPE, file.type)
+        }
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val fileDownloadWorker = OneTimeWorkRequestBuilder<FileDownloadWorker>()
+            .setConstraints(constraints)
+            .setInputData(data.build())
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "oneFileDownloadWork_${System.currentTimeMillis()}",
+            ExistingWorkPolicy.KEEP,
+            fileDownloadWorker
+        )
+
+        workManager.getWorkInfoByIdLiveData(fileDownloadWorker.id)
+            .observe(this){ info->
+                info?.let {
+                    when (it.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            success(it.outputData.getString(FileParams.KEY_FILE_URI) ?: "")
+                        }
+                        WorkInfo.State.FAILED -> {
+                            failed("Downloading failed!")
+                        }
+                        WorkInfo.State.RUNNING -> {
+                            running()
+                        }
+                        else -> {
+                            failed("Something went wrong")
+                        }
+                    }
+                }
+            }
     }
 }
 
@@ -103,7 +194,11 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                         modifier = Modifier
                             .size(size = 50.dp)
                             .align(alignment = Alignment.CenterHorizontally)
-                            .clickable { if (selectedIcon != 4) NavigationManager.instance?.navigate("administration") }
+                            .clickable {
+                                if (selectedIcon != 4) NavigationManager.instance?.navigate(
+                                    "administration"
+                                )
+                            }
                     )
                 }
 

@@ -2,6 +2,7 @@ package com.full.crm.network
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.full.crm.MainActivity
 import com.full.crm.models.Employee
 import com.full.crm.models.Role
 import com.full.crm.models.User
@@ -24,6 +25,8 @@ object API {
     val service : ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }
+
+    var mainActivity: MainActivity? = null
 
     val isAdministrator: Boolean
         get() = User.value?.getRole() == Role.MANAGER || User.value?.getRole() == Role.ADMIN

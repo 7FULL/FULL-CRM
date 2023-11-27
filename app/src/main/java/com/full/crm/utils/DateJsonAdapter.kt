@@ -1,4 +1,4 @@
-package com.full.crm.network
+package com.full.crm.utils
 
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer

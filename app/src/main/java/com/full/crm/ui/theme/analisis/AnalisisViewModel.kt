@@ -1,14 +1,27 @@
 package com.full.crm.ui.theme.agenda
 
+import android.net.Uri
 import android.util.Half.toFloat
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import co.yml.charts.common.model.Point
 import com.full.crm.models.Appointment
 import com.full.crm.models.Bill
 import com.full.crm.network.API
+import com.full.crm.utils.CustomFile
+import com.full.crm.utils.FileDownloadWorker
+import com.full.crm.utils.FileParams
+import com.google.gson.Gson
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -97,5 +110,95 @@ class AnalisisViewModel: ViewModel() {
         }
 
         return pointsDataGains.toTypedArray()
+    }
+
+    fun export(value: String): Uri? {
+        var file: Uri? = null
+
+        val bills = API.User.value!!.getBills()
+
+        when (value) {
+            "XML" -> {
+                //Creamos el documento XML
+                var xml = ""
+
+                xml += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                xml += "<bills>\n"
+
+                bills!!.forEach {
+                    xml += "\t<bill>\n"
+                    xml += "\t\t<id>${it.getId()}</id>\n"
+                    xml += "\t\t<clientId>${it.getClientID()}</clientId>\n"
+                    xml += "\t\t<employeeId>${it.getEmployeeID()}</employeeId>\n"
+                    xml += "\t\t<price>${it.getPrice()}</price>\n"
+                    xml += "\t\t<emisionDate>${it.getEmisionDate()}</emisionDate>\n"
+                    xml += "\t\t<expirationDate>${it.getExpirationDate()}</expirationDate>\n"
+                    xml += "\t\t<isPaid>${it.isPaid()}</isPaid>\n"
+                    xml += "\t</bill>\n"
+                }
+
+                xml += "</bills>\n"
+
+                //Creamos el archivo XML
+                val aux = File.createTempFile("bills", ".xml")
+
+                aux.writeText(xml)
+
+                file = Uri.fromFile(aux)
+            }
+            "JSON" -> {
+                val aux = File.createTempFile("bills", ".json")
+
+                aux.writeText(Gson().toJson(bills))
+
+                file = Uri.fromFile(aux)
+            }
+            "DOCX" -> {
+                val aux = File.createTempFile("bills", ".docx")
+
+                aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
+
+                bills!!.forEach {
+                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                }
+
+                file = Uri.fromFile(aux)
+            }
+            "PDF" -> {
+                val aux = File.createTempFile("bills", ".pdf")
+
+                aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
+
+                bills!!.forEach {
+                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                }
+
+                file = Uri.fromFile(aux)
+            }
+            "CSV" -> {
+                val aux = File.createTempFile("bills", ".csv")
+
+                aux.writeText("ID,CLIENT ID,EMPLOYEE ID,PRICE,EMISION DATE,EXPIRATION DATE,IS PAID\n")
+
+                bills!!.forEach {
+                    aux.appendText("${it.getId()},${it.getClientID()},${it.getEmployeeID()},${it.getPrice()},${it.getEmisionDate()},${it.getExpirationDate()},${it.isPaid()}\n")
+                }
+
+                file = Uri.fromFile(aux)
+            }
+            "TXT" -> {
+                val aux = File.createTempFile("bills", ".txt")
+
+                aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
+
+                bills!!.forEach {
+                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                }
+
+                file = Uri.fromFile(aux)
+            }
+        }
+
+        return file
     }
 }

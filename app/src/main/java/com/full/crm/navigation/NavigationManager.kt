@@ -11,6 +11,8 @@ import com.full.crm.ui.theme.agenda.Agenda
 import com.full.crm.ui.theme.agenda.AgendyViewModel
 import com.full.crm.ui.theme.agenda.Analisis
 import com.full.crm.ui.theme.agenda.AnalisisViewModel
+import com.full.crm.ui.theme.analisis.fullscreen.AnalisisFullScreen
+import com.full.crm.ui.theme.analisis.fullscreen.AnalisisFullScreenViewModel
 import com.full.crm.ui.theme.bills.Bills
 import com.full.crm.ui.theme.bills.BillsViewModel
 import com.full.crm.ui.theme.login.Login
@@ -59,6 +61,11 @@ object NavigationManager{
                 Analisis(analisisViewModel = AnalisisViewModel())
                 //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.AnalisisFullScreen.route) {
+                AnalisisFullScreen(analisisFullScreenViewModel = AnalisisFullScreenViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }
     }
