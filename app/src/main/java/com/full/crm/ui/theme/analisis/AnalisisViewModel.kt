@@ -1,8 +1,18 @@
 package com.full.crm.ui.theme.agenda
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.pdf.PdfDocument
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.util.Half.toFloat
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +24,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import co.yml.charts.common.model.Point
+import com.full.crm.R
 import com.full.crm.models.Appointment
 import com.full.crm.models.Bill
 import com.full.crm.network.API
@@ -22,6 +33,7 @@ import com.full.crm.utils.FileDownloadWorker
 import com.full.crm.utils.FileParams
 import com.google.gson.Gson
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -130,7 +142,7 @@ class AnalisisViewModel: ViewModel() {
                     xml += "\t\t<id>${it.getId()}</id>\n"
                     xml += "\t\t<clientId>${it.getClientID()}</clientId>\n"
                     xml += "\t\t<employeeId>${it.getEmployeeID()}</employeeId>\n"
-                    xml += "\t\t<price>${it.getPrice()}</price>\n"
+                    xml += "\t\t<price>${it.getPriceString()}</price>\n"
                     xml += "\t\t<emisionDate>${it.getEmisionDate()}</emisionDate>\n"
                     xml += "\t\t<expirationDate>${it.getExpirationDate()}</expirationDate>\n"
                     xml += "\t\t<isPaid>${it.isPaid()}</isPaid>\n"
@@ -159,7 +171,8 @@ class AnalisisViewModel: ViewModel() {
                 aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
 
                 bills!!.forEach {
-                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                    aux.appendText("")
+                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPriceString()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
                 }
 
                 file = Uri.fromFile(aux)
@@ -167,11 +180,41 @@ class AnalisisViewModel: ViewModel() {
             "PDF" -> {
                 val aux = File.createTempFile("bills", ".pdf")
 
-                aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
+                var pdfDocument: PdfDocument = PdfDocument()
 
-                bills!!.forEach {
-                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                var title: Paint = Paint()
+
+                var myPageInfo: PdfDocument.PageInfo? =
+                    PdfDocument.PageInfo.Builder(1120, 792, 1).create()
+
+                var myPage: PdfDocument.Page = pdfDocument.startPage(myPageInfo)
+
+                var canvas: Canvas = myPage.canvas
+
+                title.textSize = 24F
+
+                canvas.drawText("CRM BILLS", 209F, 100F, title)
+
+                title.textSize = 11F
+
+                title.textAlign = Paint.Align.CENTER
+
+                canvas.drawText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n", 396F, 120F, title)
+
+                bills!!.forEachIndexed { index, it ->
+                    canvas.drawText("${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPriceString()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n", 500F,
+                        (140 + index * 20).toFloat(), title)
                 }
+
+                pdfDocument.finishPage(myPage)
+
+                try {
+                    pdfDocument.writeTo(FileOutputStream(aux))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                pdfDocument.close()
 
                 file = Uri.fromFile(aux)
             }
@@ -181,7 +224,7 @@ class AnalisisViewModel: ViewModel() {
                 aux.writeText("ID,CLIENT ID,EMPLOYEE ID,PRICE,EMISION DATE,EXPIRATION DATE,IS PAID\n")
 
                 bills!!.forEach {
-                    aux.appendText("${it.getId()},${it.getClientID()},${it.getEmployeeID()},${it.getPrice()},${it.getEmisionDate()},${it.getExpirationDate()},${it.isPaid()}\n")
+                    aux.appendText("${it.getId()},${it.getClientID()},${it.getEmployeeID()},${it.getPriceString()},${it.getEmisionDate()},${it.getExpirationDate()},${it.isPaid()}\n")
                 }
 
                 file = Uri.fromFile(aux)
@@ -192,7 +235,8 @@ class AnalisisViewModel: ViewModel() {
                 aux.writeText("ID\tCLIENT ID\tEMPLOYEE ID\tPRICE\tEMISION DATE\tEXPIRATION DATE\tIS PAID\n")
 
                 bills!!.forEach {
-                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPrice()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
+                    aux.appendText("")
+                    aux.appendText("${it.getId()}\t${it.getClientID()}\t${it.getEmployeeID()}\t${it.getPriceString()}\t${it.getEmisionDate()}\t${it.getExpirationDate()}\t${it.isPaid()}\n")
                 }
 
                 file = Uri.fromFile(aux)
