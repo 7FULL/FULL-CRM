@@ -2,6 +2,7 @@ package com.full.crm.ui.theme.agenda
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -454,8 +455,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }
@@ -497,8 +498,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }
@@ -540,8 +541,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }
@@ -583,8 +584,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }
@@ -626,8 +627,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }
@@ -669,8 +670,8 @@ fun Analisis(modifier: Modifier = Modifier, analisisViewModel: AnalisisViewModel
                                         }catch (e: ActivityNotFoundException){
                                             Toast.makeText(
                                                 context,
-                                                "No se puede abrir el archivo",
-                                                Toast.LENGTH_SHORT
+                                                "Vaya, parece que no tienes ninguna aplicación para abrir este tipo de archivo",
+                                                Toast.LENGTH_LONG
                                             ).show()
                                         }
                                     }

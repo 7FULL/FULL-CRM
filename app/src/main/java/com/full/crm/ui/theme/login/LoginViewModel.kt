@@ -1,6 +1,8 @@
 package com.full.crm.ui.theme.login
 
+import android.content.Context.MODE_PRIVATE
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,6 +35,27 @@ class LoginViewModel: ViewModel() {
     private val _enableLogin = MutableLiveData<Boolean>()
     val enableLogin : LiveData<Boolean> = _enableLogin
 
+    private val _checkRememberMe = MutableLiveData<Boolean>(false)
+    val checkRememberMe : LiveData<Boolean> = _checkRememberMe
+
+    init {
+        //TODO: Podria hacerse que tuviese que confirmase el inicio de sesion con huella dactilar
+        if(!API.isLogged){
+            //Si el usuario tiene guardado el email y el password en las shared preferences lo cargamos
+            val sharedPreferences = API.mainActivity!!.getSharedPreferences("login", MODE_PRIVATE)
+            val email = sharedPreferences.getString("username", "")
+            val password = sharedPreferences.getString("password", "")
+
+            if (email != null && password != null && email.isNotEmpty() && password.isNotEmpty()) {
+                _username.value = email
+                _password.value = password
+                _checkRememberMe.value = true
+
+                login()
+            }
+        }
+    }
+
     fun signInWithGoogle(credential: AuthCredential) {
         viewModelScope.launch {
             try{
@@ -46,7 +69,7 @@ class LoginViewModel: ViewModel() {
                         Log.i("CRM", email)
 
                         viewModelScope.launch {
-                            var result = API.service.login(email!!, "678041577")
+                            var result = API.service.getUsername(email!!)
 
                             if (result.isSuccessful) {
                                 val data: DataResponse<Employee> = result.body()!!
@@ -95,6 +118,18 @@ class LoginViewModel: ViewModel() {
         _error.value = error
     }
 
+    fun onRememberMeChanged(rememberMe: Boolean) {
+        _checkRememberMe.value = rememberMe
+
+        if (!rememberMe) {
+            API.mainActivity!!.getSharedPreferences("login", MODE_PRIVATE).edit().apply {
+                putString("username", "")
+                putString("password", "")
+                apply()
+            }
+        }
+    }
+
     fun login() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -111,6 +146,16 @@ class LoginViewModel: ViewModel() {
 
                         Log.i("CRM", "Login correcto")
                         Log.i("CRM", response.data.toString())
+
+                        //Si el login ha sido exitoso miramos si el usuario ha checkeado el remember me
+                        if (_checkRememberMe.value!!) {
+                            //Si lo ha checkeado guardamos el email y el password en las shared preferences
+                            API.mainActivity!!.getSharedPreferences("login", MODE_PRIVATE).edit().apply {
+                                putString("username", username.value)
+                                putString("password", password.value)
+                                apply()
+                            }
+                        }
 
                         NavigationManager.instance?.navigate("agenda")
                     } else {

@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -35,6 +36,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -53,12 +56,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.full.crm.R
 import com.full.crm.navigation.NavigationManager
 import com.full.crm.network.API
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.play.integrity.internal.x
 import com.google.firebase.auth.GoogleAuthProvider
 
 @Composable
@@ -87,6 +92,8 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val username: String by loginViewModel.username.observeAsState(initial = "")
     val error: String by loginViewModel.error.observeAsState(initial = "")
+
+    val checked: Boolean by loginViewModel.checkRememberMe.observeAsState(initial = false)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ){
@@ -264,28 +271,20 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 .requiredWidth(width = 98.dp)
                 .requiredHeight(height = 15.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .requiredSize(size = 13.dp)
-                    .clip(shape = RoundedCornerShape(3.dp))
-                    .background(color = Color(0xfff4f4f4))
-                    .border(
-                        border = BorderStroke(1.dp, Color.Black),
-                        shape = RoundedCornerShape(3.dp)
-                    ))
-            Text(
-                text = "Recuérdame",
-                color = Color(0xffbfc4cf),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontSize = 14.sp),
-                modifier = Modifier
-                    .align(alignment = Alignment.TopStart)
-                    .offset(
-                        x = 17.dp,
-                        y = (-3).dp
-                    )
-                    .wrapContentHeight(align = Alignment.CenterVertically))
+
+            Box() {
+                Checkbox(modifier = Modifier.offset(x = (-0).dp), checked = checked, onCheckedChange = { loginViewModel.onRememberMeChanged(it) })
+                Text(
+                    text = "Recuérdame",
+                    color = Color(0xffbfc4cf),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(fontSize = 14.sp),
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        .offset(x = 20.dp, y= (-2).dp)
+                        .padding(start = 19.dp)
+                        .wrapContentHeight(align = Alignment.CenterVertically))
+            }
         }
         //TODO: Remember to remove it when the app is in production
         Button(

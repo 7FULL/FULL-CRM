@@ -1,5 +1,6 @@
 package com.full.crm.network
 
+import com.full.crm.models.Appointment
 import com.full.crm.models.Bill
 import com.full.crm.models.Client
 import com.full.crm.models.Employee
@@ -7,6 +8,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ApiService {
@@ -32,6 +34,9 @@ interface ApiService {
      */
     @POST("api/employee/login")
     suspend fun login(@Query("username") username: String, @Query("password") password: String): Response<DataResponse<Employee>>
+
+    @POST("api/employee/getUsername")
+    suspend fun getUsername(@Query("username") username: String): Response<DataResponse<Employee>>
 
     /**
      * Function to get a client based on the email
@@ -60,12 +65,18 @@ interface ApiService {
     @POST("api/employee/checkToken")
     suspend fun checkToken(@Query("token") token: String): Response<DataResponse<String>>
 
-    @POST("api/employee/newPassword")
+    @PUT("api/employee/newPassword")
     suspend fun newPassword(@Query("token") token: String, @Query("password") password: String): Response<DataResponse<String>>
 
-    @GET("api/bill/getBills")
+    @GET("api/admin/getBills")
     suspend fun getBills(): Response<DataResponse<Array<Bill>>>
 
-    @GET("api/client/getClients")
+    @GET("api/admin/getClients")
     suspend fun getClients(): Response<DataResponse<Array<Client>>>
+
+    @GET("api/admin/getEmployees")
+    suspend fun getEmployees(): Response<DataResponse<Array<Employee>>>
+
+    @GET("api/admin/getAppointments")
+    suspend fun getAppointments(): Response<DataResponse<Array<Appointment>>>
 }

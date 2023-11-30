@@ -85,20 +85,25 @@ class BillsViewModel: ViewModel() {
     fun addBill(expirationDate: Date, emissionDate: Date){
         val client = auxClients?.find { it.getName().equals(_clientName.value, true) }
 
+        //Si el precio contiene una , la cambiamos por un .
+        if (_price.value?.contains(",") == true){
+            _price.value = _price.value?.replace(",", ".")
+        }
+
         val bill = Bill(
             emissionDate,
             expirationDate,
             BigDecimal(_price.value),
             false,
             _name.value,
-            client!!.getId(),
+            client?.getId() ?: "",
             API.User.value!!.getId()
         )
 
         viewModelScope.launch {
             API.service.addBill(
                 BillRequest(
-                    API.employeeLogged!!, client!!, bill
+                    API.employeeLogged!!, client?: Client(), bill
                 )
             )
         }

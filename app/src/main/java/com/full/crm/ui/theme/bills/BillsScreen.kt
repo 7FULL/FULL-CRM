@@ -1,5 +1,6 @@
 package com.full.crm.ui.theme.bills
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -113,16 +114,14 @@ fun Bills(billsViewModel: BillsViewModel) {
 
         floatingActionButton =
         {
-            if(!API.isAdministrator){
-                FloatingActionButton(onClick =
-                {
-                    openAlertDialog.value = true
-                },
-                    containerColor = Color(0xFF26A69A),
-                    contentColor = Color.White
-                ){
-                    Text("+", fontSize = 30.sp)
-                }
+            FloatingActionButton(onClick =
+            {
+                openAlertDialog.value = true
+            },
+                containerColor = Color(0xFF26A69A),
+                contentColor = Color.White
+            ){
+                Text("+", fontSize = 30.sp)
             }
         },
     ) { padding ->
@@ -133,7 +132,7 @@ fun Bills(billsViewModel: BillsViewModel) {
 
                 AlertDialog(
                     title = {
-                        Text(text = "INSERTAR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        Text(text = "EMITIR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                     },
                     text = {
                         Box(){
@@ -197,15 +196,17 @@ fun Bills(billsViewModel: BillsViewModel) {
                                 )
                             }
 
-                            Box(modifier = Modifier.padding(top = 400.dp)) {
-                                Text(text = "Cliente:", modifier = Modifier.padding(start = 1.dp))
-                                DropdownMenuBox(items = billsViewModel.originalClients.value!!,
-                                    placeholder = "Sin clientes",
-                                    modifier = Modifier.padding(top = 25.dp),
-                                    onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it ) },
-                                )
+                            if(!API.isAdministrator){
+                                Box(modifier = Modifier.padding(top = 400.dp)) {
+                                    Text(text = "Cliente:", modifier = Modifier.padding(start = 1.dp))
+                                    DropdownMenuBox(items = billsViewModel.originalClients.value!!,
+                                        placeholder = "Sin clientes",
+                                        modifier = Modifier.padding(top = 25.dp),
+                                        onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it ) },
+                                    )
+                                }
                             }
-                            
+
                             when{ openDialogEmision.value ->
                                 DatePickerDialog(
                                     onDismissRequest = {
@@ -281,12 +282,23 @@ fun Bills(billsViewModel: BillsViewModel) {
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                openAlertDialog.value = false
+                                //Si la fecha de emision es anterior a la fecha de expiracion
 
-                                billsViewModel.addBill(Date(datePickerEmisionState.selectedDateMillis!!), Date(datePickerExpiracionState.selectedDateMillis!!))
+                                if(datePickerEmisionState.selectedDateMillis?:milSec < datePickerExpiracionState.selectedDateMillis?:milSec){
+                                    //Si todos los campos estan rellenos
+                                    if(formPrice.isNotEmpty() && formName.isNotEmpty()){
+                                        billsViewModel.addBill(Date(datePickerExpiracionState.selectedDateMillis?: milSec), Date(datePickerEmisionState.selectedDateMillis?: milSec))
+
+                                        openAlertDialog.value = false
+                                    }else{
+                                        Toast.makeText(API.mainActivity, "Debes rellenar todos los campos", Toast.LENGTH_LONG).show()
+                                    }
+                                }else{
+                                    Toast.makeText(API.mainActivity, "La fecha de emisión no puede ser posterior a la fecha de expiración", Toast.LENGTH_LONG).show()
+                                }
                             }
                         ) {
-                            Text("Insertar")
+                            Text("Emitir")
                         }
                     },
                     dismissButton = {

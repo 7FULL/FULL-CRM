@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.full.crm.LockScreenOrientation
+import com.full.crm.ui.theme.administracion.Administracion
+import com.full.crm.ui.theme.administracion.AdministracionViewModel
 import com.full.crm.ui.theme.agenda.Agenda
 import com.full.crm.ui.theme.agenda.AgendyViewModel
 import com.full.crm.ui.theme.agenda.Analisis
@@ -66,6 +68,10 @@ object NavigationManager{
                 AnalisisFullScreen(analisisFullScreenViewModel = AnalisisFullScreenViewModel())
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
                 //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Administracion.route) {
+                Administracion(administracionViewModel = AdministracionViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }
     }
