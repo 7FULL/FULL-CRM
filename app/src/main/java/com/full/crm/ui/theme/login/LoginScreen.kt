@@ -123,7 +123,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
                 13, 8, 14 -> loginViewModel.onErrorChanged("Parece que hay un error desconocido, contacte con el administrador")
                 5 -> loginViewModel.onErrorChanged("Parece que tu cuenta no es valida, contacte con el administrador")
                 7, 22, 15 -> loginViewModel.onErrorChanged("Parece que hay un error de red, comprueba tu conexion")
-                else -> loginViewModel.onErrorChanged("Parece que hay un error desconocido, contacte con el administrador")
+                else -> loginViewModel.onErrorChanged("Parece que hay un error iniciando sesion con google")
             }
 
             Log.i("CRM", "Inicio de sesion con google fallo", e)

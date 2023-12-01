@@ -1,6 +1,7 @@
 package com.full.crm.ui.theme.bills
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -114,6 +115,8 @@ class BillsViewModel: ViewModel() {
         //Volvemos a filtrar las facturas por fecha
         _bills.value = _bills.value?.sortedByDescending { it.getEmisionDate() }?.toTypedArray()
         filterBills()
+
+        Toast.makeText(API.mainActivity, "Factura añadida", Toast.LENGTH_SHORT).show()
     }
 
     //Esta funcion es la encargada de filtrar las facturas segun el filtro de busqueda el filtro de cliente y el filtro de estado
