@@ -1,5 +1,6 @@
 package com.full.crm.ui.theme.bills
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,9 +18,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
@@ -85,6 +89,9 @@ fun Bills(billsViewModel: BillsViewModel) {
     val formPrice: String by billsViewModel.price.observeAsState("")
     val formClient: String by billsViewModel.clientName.observeAsState("")
 
+    val editingBill by billsViewModel.editingBill.observeAsState(false)
+    val billEditing by billsViewModel.editingBillData.observeAsState(null)
+
     val calendar = Calendar.getInstance()
     val milSec = calendar.timeInMillis
 
@@ -126,13 +133,32 @@ fun Bills(billsViewModel: BillsViewModel) {
         },
     ) { padding ->
         when{
-            openAlertDialog.value -> {
+            openAlertDialog.value || editingBill -> {
                 val openDialogEmision = remember { mutableStateOf(false) }
                 val openDialogExpiración = remember { mutableStateOf(false) }
 
+                val confirmDelete = remember { mutableStateOf(false) }
+
+                if(editingBill){
+                    val calendar = Calendar.getInstance()
+                    calendar.time = billEditing?.getEmisionDate()!!
+                    datePickerEmisionState.setSelection(calendar.timeInMillis)
+
+                    calendar.time = billEditing?.getExpirationDate()!!
+                    datePickerExpiracionState.setSelection(calendar.timeInMillis)
+
+                    billsViewModel.onBillFormChanged(billEditing?.getPriceWithoutCurrency()?: "", billEditing?.getName()?: "", billEditing!!.getClientID()
+                        ?.let { billsViewModel.getClientName(it) }
+                        ?: "")
+                }
+
                 AlertDialog(
                     title = {
-                        Text(text = "EMITIR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        if (editingBill){
+                            Text(text = "EDITAR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        } else {
+                            Text(text = "EMITIR FACTURA", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                        }
                     },
                     text = {
                         Box(){
@@ -203,6 +229,31 @@ fun Bills(billsViewModel: BillsViewModel) {
                                         placeholder = "Sin clientes",
                                         modifier = Modifier.padding(top = 25.dp),
                                         onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it ) },
+                                    )
+                                }
+                            }
+
+                            if(editingBill){
+                                Box(modifier = Modifier.padding(top = 400.dp)) {
+                                    Button(
+                                        content = {
+                                            Text(text = "Eliminar factura", modifier = Modifier.padding(start = 1.dp))
+                                            Icon(Icons.Filled.DeleteForever, contentDescription = null)
+                                                  },
+                                        onClick = {
+                                            if (confirmDelete.value){
+                                                billsViewModel.deleteBill(billEditing!!)
+
+                                                confirmDelete.value = false
+                                                openAlertDialog.value = false
+                                            } else {
+                                                confirmDelete.value = true
+
+                                                Toast.makeText(API.mainActivity, "Pulsa de nuevo para confirmar", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
                             }
@@ -278,6 +329,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                     },
                     onDismissRequest = {
                         openAlertDialog.value = false
+                        billsViewModel.resetEditingBill()
                     },
                     confirmButton = {
                         TextButton(
@@ -290,6 +342,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                                         billsViewModel.addBill(Date(datePickerExpiracionState.selectedDateMillis?: milSec), Date(datePickerEmisionState.selectedDateMillis?: milSec))
 
                                         openAlertDialog.value = false
+                                        billsViewModel.resetEditingBill()
                                     }else{
                                         Toast.makeText(API.mainActivity, "Debes rellenar todos los campos", Toast.LENGTH_LONG).show()
                                     }
@@ -298,13 +351,18 @@ fun Bills(billsViewModel: BillsViewModel) {
                                 }
                             }
                         ) {
-                            Text("Emitir")
+                            if (editingBill){
+                                Text("Editar")
+                            } else {
+                                Text("Emitir")
+                            }
                         }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = {
                                 openAlertDialog.value = false
+                                billsViewModel.resetEditingBill()
                             }
                         ) {
                             Text("Cancelar")

@@ -6,6 +6,7 @@ import com.full.crm.models.Client
 import com.full.crm.models.Employee
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -35,8 +36,8 @@ interface ApiService {
     @POST("api/employee/login")
     suspend fun login(@Query("username") username: String, @Query("password") password: String): Response<DataResponse<Employee>>
 
-    @POST("api/employee/getUsername")
-    suspend fun getUsername(@Query("username") username: String): Response<DataResponse<Employee>>
+    @POST("api/employee/getEmployee")
+    suspend fun getEmployee(@Query("username") username: String): Response<DataResponse<Employee>>
 
     /**
      * Function to get a client based on the email
@@ -79,4 +80,25 @@ interface ApiService {
 
     @GET("api/admin/getAppointments")
     suspend fun getAppointments(): Response<DataResponse<Array<Appointment>>>
+
+    @POST("api/admin/addClient")
+    suspend fun addClient(@Body client: Client): Response<DataResponse<String>>
+
+    @POST("api/admin/addEmployee")
+    suspend fun addEmployee(@Body employee: Employee): Response<DataResponse<String>>
+
+    @POST("api/addAppointment")
+    suspend fun addAppointment(@Body appointment: Appointment): Response<DataResponse<String>>
+
+    @DELETE("api/admin/deleteClient")
+    suspend fun deleteClient(@Query("id") id: String): Response<DataResponse<String>>
+
+    @DELETE("api/admin/deleteEmployee")
+    suspend fun deleteEmployee(@Query("id") id: String): Response<DataResponse<String>>
+
+    @DELETE("api/admin/deleteAppointment")
+    suspend fun deleteAppointment(@Query("id") id: String): Response<DataResponse<String>>
+
+    @DELETE("api/admin/deleteBill")
+    suspend fun deleteBill(@Query("id") id: String): Response<DataResponse<String>>
 }

@@ -65,8 +65,6 @@ import com.full.crm.ui.theme.CRMTheme
 import com.full.crm.utils.CustomFile
 import com.full.crm.utils.FileDownloadWorker
 import com.full.crm.utils.FileParams
-import com.himanshoe.kalendar.Kalendar
-import com.himanshoe.kalendar.KalendarType
 import kotlinx.datetime.LocalDate
 
 
@@ -181,6 +179,7 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                 .background(color = Color(0xFF1976D2))
                 .border(border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.51f))))
         Row(modifier.fillMaxWidth()){
+
             if (API.isAdministrator) {
                 Column (
                     modifier = modifier
@@ -204,6 +203,8 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
 
             }
 
+
+            /*
             Column (
                 modifier = modifier
                     .weight(1f)
@@ -219,6 +220,8 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                         .clickable { if (selectedIcon != 0) NavigationManager.instance?.navigate("agenda") }
                 )
             }
+            */
+
             Column (
                 modifier = modifier
                     .weight(1f)

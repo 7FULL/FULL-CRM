@@ -77,6 +77,14 @@ class BillsViewModel: ViewModel() {
 
     val clientName: LiveData<String> = _clientName
 
+    //Booleano que indica si se esta editando una factura
+    private val _editingBill = MutableLiveData(false)
+    val editingBill: LiveData<Boolean> = _editingBill
+
+    //Factura que se esta editando
+    private val _editingBillData = MutableLiveData<Bill>()
+    val editingBillData: LiveData<Bill> = _editingBillData
+
     fun onBillFormChanged(price: String, name: String, clientName: String){
         _price.value = price
         _name.value = name
@@ -91,7 +99,23 @@ class BillsViewModel: ViewModel() {
             _price.value = _price.value?.replace(",", ".")
         }
 
+        //Si contien un $ lo quitamos
+        if (_price.value?.contains("$") == true){
+            _price.value = _price.value?.replace("$", "")
+        }
+
+        //Si contiene un euro lo quitamos
+        if (_price.value?.contains("€") == true){
+            _price.value = _price.value?.replace("€", "")
+        }
+
+        //Si contiene un espacio lo quitamos
+        if (_price.value?.contains(" ") == true){
+            _price.value = _price.value?.replace(" ", "")
+        }
+
         val bill = Bill(
+            editingBillData.value?.getId(),
             emissionDate,
             expirationDate,
             BigDecimal(_price.value),
@@ -109,8 +133,12 @@ class BillsViewModel: ViewModel() {
             )
         }
 
-        //Añadimos la factura a la lista
-        _bills.value = _bills.value?.toMutableList()?.apply { add(0, bill) }?.toTypedArray()
+        //Si no estamos editando una factura añadimos la factura a la lista sino la actualizamos
+        if (!editingBill.value!!){
+            _bills.value = _bills.value?.toMutableList()?.apply { add(0, bill) }?.toTypedArray()
+        } else {
+            _bills.value = _bills.value?.toMutableList()?.apply { set(indexOf(editingBillData.value), bill) }?.toTypedArray()
+        }
 
         //Volvemos a filtrar las facturas por fecha
         _bills.value = _bills.value?.sortedByDescending { it.getEmisionDate() }?.toTypedArray()
@@ -204,10 +232,50 @@ class BillsViewModel: ViewModel() {
 
     fun onBillClicked(bill: Bill){
         Log.i("CRM", "Factura pulsada")
-        //TODO: Navigate to the bill when the screen its made
+
+        //Si es administrador o la factura es del empleado actual
+        if (API.isAdministrator){
+            _editingBill.value = true
+            _editingBillData.value = bill
+
+            Log.i("CRM", bill.toString())
+        } else {
+            Toast.makeText(API.mainActivity, "No tienes permisos para editar facturas", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun resetEditingBill(){
+        _editingBill.value = false
+        _editingBillData.value = null
+
+        _price.value = ""
+        _name.value = ""
+        _clientName.value = ""
+
+        _client.value = "Todos"
     }
 
     fun addClient(nombre: String) {
         _clients.value = _clients.value?.toMutableList()?.apply { add(0, nombre) }?.toTypedArray()
+    }
+
+    fun getClientName(id: String): String? {
+        return auxClients?.find { it.getId().equals(id, true) }?.getName()
+    }
+
+    fun deleteBill(bill: Bill){
+        viewModelScope.launch {
+            API.service.deleteBill(
+                bill.getId()!!
+            )
+
+            Toast.makeText(API.mainActivity, "Factura eliminada", Toast.LENGTH_SHORT).show()
+        }
+
+        _bills.value = _bills.value?.toMutableList()?.apply { remove(bill) }?.toTypedArray()
+        _searchBills.value = _searchBills.value?.apply { remove(bill) }
+        _auxBills.value = _auxBills.value?.toMutableList()?.apply { remove(bill) }?.toTypedArray()?.toMutableList()
+
+        resetEditingBill()
     }
 }

@@ -9,8 +9,9 @@ import java.util.Date
 import java.util.Locale
 
 
-class Bill//Constructor con todos los atributos menos la id
+class Bill
     (
+    private val id: String?,
     @JsonAdapter(IsoDateTimeSerializer::class)
     private val emissionDate: Date?,
     @JsonAdapter(IsoDateTimeSerializer::class)
@@ -21,7 +22,10 @@ class Bill//Constructor con todos los atributos menos la id
     private val clientID: String?,
     private val employeeID: String?
 ) {
-    private val id: String? = null
+
+        //Constructores
+        constructor() : this(null, null, null, null, false, null, null, null)
+        constructor(emissionDate: Date?, expirationDate: Date?, price: BigDecimal?, paid: Boolean, name: String?, clientID: String?, employeeID: String?) : this(null, emissionDate, expirationDate, price, paid, name, clientID, employeeID)
 
     //Getters
     fun getId(): String? {
@@ -54,6 +58,11 @@ class Bill//Constructor con todos los atributos menos la id
         eurCostFormat.minimumFractionDigits = 1
         eurCostFormat.maximumFractionDigits = 2
         return eurCostFormat.format(displayVal.toDouble())
+    }
+
+    fun getPriceWithoutCurrency(): String{
+        val displayVal: BigDecimal = this.price?.setScale(2, RoundingMode.HALF_EVEN) ?: BigDecimal(0)
+        return displayVal.toString()
     }
 
     fun isPaid(): Boolean {

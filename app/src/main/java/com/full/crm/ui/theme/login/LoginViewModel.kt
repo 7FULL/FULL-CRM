@@ -2,7 +2,6 @@ package com.full.crm.ui.theme.login
 
 import android.content.Context.MODE_PRIVATE
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -51,7 +50,24 @@ class LoginViewModel: ViewModel() {
                 _password.value = password
                 _checkRememberMe.value = true
 
-                login()
+                viewModelScope.launch {
+                    var result = API.service.getEmployee(email!!)
+
+                    if (result.isSuccessful) {
+                        val data: DataResponse<Employee> = result.body()!!
+
+                        if (data.code == 200) {
+                            API.setUser(data.data!!)
+                            NavigationManager.instance?.navigate("bills")
+                        }
+                        else if (data.code == 401) {
+                            _error.value = "Usuario no reconocido"
+                        }
+                    } else {
+                        Log.i("CRM", "Error en el login con google")
+                        Log.i("CRM", result.toString())
+                    }
+                }
             }
         }
     }
@@ -69,13 +85,14 @@ class LoginViewModel: ViewModel() {
                         Log.i("CRM", email)
 
                         viewModelScope.launch {
-                            var result = API.service.getUsername(email!!)
+                            var result = API.service.getEmployee(email!!)
 
                             if (result.isSuccessful) {
                                 val data: DataResponse<Employee> = result.body()!!
 
                                 if (data.code == 200) {
-                                    NavigationManager.instance?.navigate("agenda")
+                                    API.setUser(data.data!!)
+                                    NavigationManager.instance?.navigate("bills")
                                 }
                                 else if (data.code == 401) {
                                      _error.value = "Usuario no reconocido"
@@ -157,7 +174,7 @@ class LoginViewModel: ViewModel() {
                             }
                         }
 
-                        NavigationManager.instance?.navigate("agenda")
+                        NavigationManager.instance?.navigate("bills")
                     } else {
                         //Podria manejarse tambien los mensajes en el backend y mostrarlos aqui
                         when (response.code) {
