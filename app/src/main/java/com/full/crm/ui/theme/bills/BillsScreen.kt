@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
@@ -95,6 +97,8 @@ fun Bills(billsViewModel: BillsViewModel) {
     val calendar = Calendar.getInstance()
     val milSec = calendar.timeInMillis
 
+    val emitted: Boolean by billsViewModel.emmited.observeAsState(false)
+
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
 
     val datePickerEmisionState =
@@ -149,7 +153,7 @@ fun Bills(billsViewModel: BillsViewModel) {
 
                     billsViewModel.onBillFormChanged(billEditing?.getPriceWithoutCurrency()?: "", billEditing?.getName()?: "", billEditing!!.getClientID()
                         ?.let { billsViewModel.getClientName(it) }
-                        ?: "")
+                        ?: "", billEditing?.isEmitted()?: false)
                 }
 
                 AlertDialog(
@@ -205,7 +209,7 @@ fun Bills(billsViewModel: BillsViewModel) {
                                 Text(text = "Precio:", modifier = Modifier.padding(start = 1.dp))
                                 TextField(
                                     value = formPrice,
-                                    onValueChange = { billsViewModel.onBillFormChanged( it, formName, formClient ) },
+                                    onValueChange = { billsViewModel.onBillFormChanged( it, formName, formClient, emitted) },
                                     readOnly = false,
                                     modifier = Modifier.padding(top = 25.dp),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -216,25 +220,33 @@ fun Bills(billsViewModel: BillsViewModel) {
                                 Text(text = "Nombre:", modifier = Modifier.padding(start = 1.dp))
                                 TextField(
                                     value = formName,
-                                    onValueChange = { billsViewModel.onBillFormChanged( formPrice, it, formClient ) },
+                                    onValueChange = { billsViewModel.onBillFormChanged( formPrice, it, formClient, emitted) },
                                     readOnly = false,
                                     modifier = Modifier.padding(top = 25.dp)
                                 )
                             }
 
+                            Box(modifier = Modifier.padding(top = 400.dp)) {
+                                Text(text = "Factura emitida:", modifier = Modifier.padding(start = 1.dp))
+                                // Checkbox
+                                Checkbox(checked = emitted, onCheckedChange = { billsViewModel.onBillFormChanged( formPrice, formName, formClient, it) },
+                                    modifier = Modifier.padding(start = 100.dp).offset(x = 0.dp, y = (-12).dp)
+                                )
+                            }
+
                             if(!API.isAdministrator){
-                                Box(modifier = Modifier.padding(top = 400.dp)) {
+                                Box(modifier = Modifier.padding(top = 500.dp)) {
                                     Text(text = "Cliente:", modifier = Modifier.padding(start = 1.dp))
                                     DropdownMenuBox(items = billsViewModel.originalClients.value!!,
                                         placeholder = "Sin clientes",
                                         modifier = Modifier.padding(top = 25.dp),
-                                        onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it ) },
+                                        onValueChange = { billsViewModel.onBillFormChanged( formPrice, formName, it, emitted) },
                                     )
                                 }
                             }
 
                             if(editingBill){
-                                Box(modifier = Modifier.padding(top = 400.dp)) {
+                                Box(modifier = Modifier.padding(top = 450.dp)) {
                                     Button(
                                         content = {
                                             Text(text = "Eliminar factura", modifier = Modifier.padding(start = 1.dp))

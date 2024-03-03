@@ -292,7 +292,7 @@ fun Body(modifier: Modifier = Modifier, loginViewModel: LoginViewModel) {
         Button(
             modifier = Modifier.padding(start = 200.dp),
             onClick = {
-                loginViewModel.onLoginChanged("admin2", "678041577")
+                loginViewModel.onLoginChanged("phgfull@gmail.com", "678041577")
                 loginViewModel.login()
             }
         ) {

@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.AssuredWorkload
+import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Search
@@ -265,6 +266,38 @@ fun OptionsBar(modifier: Modifier = Modifier, selectedIcon: Int) {
                         .size(size = 50.dp)
                         .align(alignment = Alignment.CenterHorizontally)
                         .clickable { if (selectedIcon != 3) API.logout() }
+                )
+            }
+
+            Column (
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ){
+                Icon(
+                    tint = if (selectedIcon == 4) Color(R.color.primaryDescendant) else Color.White,
+                    imageVector = Icons.Rounded.CalendarMonth,
+                    contentDescription = "Vector",
+                    modifier = Modifier
+                        .size(size = 50.dp)
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 4) NavigationManager.instance?.navigate("projects") }
+                )
+            }
+
+            Column (
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ){
+                Icon(
+                    tint = if (selectedIcon == 5) Color(R.color.primaryDescendant) else Color.White,
+                    imageVector = Icons.Rounded.ExitToApp,
+                    contentDescription = "Vector",
+                    modifier = Modifier
+                        .size(size = 50.dp)
+                        .align(alignment = Alignment.CenterHorizontally)
+                        .clickable { if (selectedIcon != 5) NavigationManager.instance?.navigate("tasks") }
                 )
             }
         }

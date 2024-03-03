@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.proyectostareas.vistas.TareasScreen
 import com.full.crm.LockScreenOrientation
 import com.full.crm.ui.theme.administracion.Administracion
 import com.full.crm.ui.theme.administracion.AdministracionViewModel
@@ -25,6 +26,7 @@ import com.full.crm.ui.theme.login.checkToken.NewPassword
 import com.full.crm.ui.theme.login.checkToken.NewPasswordViewModel
 import com.full.crm.ui.theme.login.forgotPassword.ForgotPassword
 import com.full.crm.ui.theme.login.forgotPassword.ForgotPasswordViewModel
+import com.full.crm.ui.theme.proyectos.ProyectosScreen
 
 object NavigationManager{
     var instance: NavHostController? = null;
@@ -71,6 +73,14 @@ object NavigationManager{
             }
             composable(AppScreens.Administracion.route) {
                 Administracion(administracionViewModel = AdministracionViewModel())
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Proyectos.route) {
+                ProyectosScreen()
+                LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            }
+            composable(AppScreens.Tareas.route) {
+                TareasScreen()
                 LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
         }

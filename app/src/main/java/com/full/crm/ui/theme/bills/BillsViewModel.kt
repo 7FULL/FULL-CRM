@@ -81,14 +81,18 @@ class BillsViewModel: ViewModel() {
     private val _editingBill = MutableLiveData(false)
     val editingBill: LiveData<Boolean> = _editingBill
 
+    private val _emmited = MutableLiveData(false)
+    val emmited: LiveData<Boolean> = _emmited
+
     //Factura que se esta editando
     private val _editingBillData = MutableLiveData<Bill>()
     val editingBillData: LiveData<Bill> = _editingBillData
 
-    fun onBillFormChanged(price: String, name: String, clientName: String){
+    fun onBillFormChanged(price: String, name: String, clientName: String, emitted: Boolean){
         _price.value = price
         _name.value = name
         _clientName.value = clientName
+        _emmited.value = emitted
     }
 
     fun addBill(expirationDate: Date, emissionDate: Date){
@@ -115,13 +119,14 @@ class BillsViewModel: ViewModel() {
         }
 
         val bill = Bill(
-            editingBillData.value?.getId(),
+            editingBillData.value?.getId() ?: "",
             emissionDate,
             expirationDate,
             BigDecimal(_price.value),
             false,
             _name.value,
             client?.getId() ?: "",
+            _emmited.value ?: false,
             API.User.value!!.getId()
         )
 

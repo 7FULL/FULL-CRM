@@ -20,16 +20,29 @@ class Bill
     private val paid: Boolean,
     private val name: String?,
     private val clientID: String?,
+    private val sent: Boolean?,
     private val employeeID: String?
 ) {
 
         //Constructores
-        constructor() : this(null, null, null, null, false, null, null, null)
-        constructor(emissionDate: Date?, expirationDate: Date?, price: BigDecimal?, paid: Boolean, name: String?, clientID: String?, employeeID: String?) : this(null, emissionDate, expirationDate, price, paid, name, clientID, employeeID)
+        constructor() : this(null, null, null, null, false, null, null, null, null)
+        constructor(
+            emissionDate: Date?,
+            expirationDate: Date?,
+            price: BigDecimal?,
+            paid: Boolean,
+            name: String?,
+            clientID: String?,
+            emitted:Boolean?,
+            employeeID: String?) : this(null, emissionDate, expirationDate, price, paid, name, clientID, emitted, employeeID)
 
     //Getters
     fun getId(): String? {
         return id
+    }
+
+    fun isEmitted(): Boolean? {
+        return sent
     }
 
     fun getClientID(): String? {

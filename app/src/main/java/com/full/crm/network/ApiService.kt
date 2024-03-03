@@ -34,7 +34,7 @@ interface ApiService {
      * @return The employee and status 200 if the login is correct, else returns an empty employee and status 401
      */
     @POST("api/employee/login")
-    suspend fun login(@Query("username") username: String, @Query("password") password: String): Response<DataResponse<Employee>>
+    suspend fun login(@Body credentials: Map<String, String> ): Response<DataResponse<Employee>>
 
     @POST("api/employee/getEmployee")
     suspend fun getEmployee(@Query("username") username: String): Response<DataResponse<Employee>>
@@ -90,15 +90,15 @@ interface ApiService {
     @POST("api/addAppointment")
     suspend fun addAppointment(@Body appointment: Appointment): Response<DataResponse<String>>
 
-    @DELETE("api/admin/deleteClient")
+    @POST("api/admin/deleteClient")
     suspend fun deleteClient(@Query("id") id: String): Response<DataResponse<String>>
 
-    @DELETE("api/admin/deleteEmployee")
+    @POST("api/admin/deleteEmployee")
     suspend fun deleteEmployee(@Query("id") id: String): Response<DataResponse<String>>
 
-    @DELETE("api/admin/deleteAppointment")
+    @POST("api/admin/deleteAppointment")
     suspend fun deleteAppointment(@Query("id") id: String): Response<DataResponse<String>>
 
-    @DELETE("api/admin/deleteBill")
+    @POST("api/admin/deleteBill")
     suspend fun deleteBill(@Query("id") id: String): Response<DataResponse<String>>
 }

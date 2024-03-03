@@ -151,8 +151,11 @@ class LoginViewModel: ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
 
+            //We generate a map with the username and the password
+            val credentials = mapOf("username" to _username.value!!, "password" to _password.value!!)
+
             try{
-                var result = API.service.login(username.value!!, password.value!!)
+                var result = API.service.login(credentials)
 
                 if (result.isSuccessful) {
 
